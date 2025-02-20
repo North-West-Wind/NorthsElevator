@@ -7,7 +7,7 @@ import { getConfig, writeConfig } from "./helpers/control";
 import { FLOORS } from "./constants";
 import "./handler";
 import { realOrNotFoundFloor } from "./helpers/math";
-import { FirstPersonControls } from "three/addons/Addons.js";
+import { FirstPersonControls } from "three/addons/controls/FirstPersonControls.js";
 
 if (!WebGL.isWebGL2Available()) {
   alert("WebGL is not supported! You have lost your privilege to the R³ space.");

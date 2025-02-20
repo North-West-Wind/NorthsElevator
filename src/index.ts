@@ -37,7 +37,7 @@ app.set('view engine', 'ejs');
 app.get("/api/ping", (_req, res) => res.sendStatus(200));
 app.get("/api/config", (req, res) => {
 	res.json({
-		pfps: fs.readdirSync(path.join(root, "assets/pfps")),
+		pfps: fs.readdirSync(path.join(root, "assets/pfps"), { withFileTypes: true }).filter(ent => ent.isFile()).map(ent => ent.name),
 		info: fs.readdirSync(path.join(root, "contents/info-center"))
 	});
 });
