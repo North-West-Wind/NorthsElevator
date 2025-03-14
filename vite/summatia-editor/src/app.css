@@ -1,8 +1,20 @@
-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
+.conversation-level {
+	display: flex;
+	flex-direction: column;
+	margin: 0 1vmax;
+}
+
+.conversation-layer {
+	display: flex;
+}
+
+.conversation-cell {
+	font-size: 1vmax;
+	padding: 1vmax;
+	white-space: nowrap;
+	margin: 1vmax 0;
+}
+
+.conversation-cell.exist {
+	opacity: 0.5;
 }

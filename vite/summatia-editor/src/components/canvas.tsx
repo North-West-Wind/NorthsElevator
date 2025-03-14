@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { Summatia, SummatiaConversationBranch, SummatiaConversationLinear } from "../types/summatia";
+import { JSX } from "preact/jsx-runtime";
 
 export default function SummatiaCanvas(props: { data: Summatia }) {
 	const ref = useRef<HTMLCanvasElement>(null);
@@ -32,8 +33,9 @@ export default function SummatiaCanvas(props: { data: Summatia }) {
 			ctx.fillStyle = "#232323";
 			ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-			const fontSize = ctx.canvas.width / 50;
+			const fontSize = ctx.canvas.width / 75;
 			ctx.font = `${fontSize}px Arial`;
+			const drawn = new Set<string>();
 			const layerMap = new Map<string, number>();
 			const levelMap = new Map<string, number>();
 			let entryLayer = 0;
@@ -43,6 +45,7 @@ export default function SummatiaCanvas(props: { data: Summatia }) {
 				const queue = [entry];
 				let key: string | undefined;
 				while (key = queue.shift()) {
+					if (drawn.has(key)) continue;
 					const layer = layerMap.get(key)!;
 					const level = levelMap.get(key)!;
 					const conversation = props.data.conversation.get(key);
@@ -51,9 +54,11 @@ export default function SummatiaCanvas(props: { data: Summatia }) {
 					ctx.fillStyle = "#fff";
 					ctx.fillRect(level * 100 + 20, layer * 50 + 20, metrics.width + fontSize * 2, fontSize * 2);
 					ctx.textAlign = "left";
-					ctx.textBaseline = "top";
+					ctx.textBaseline = "middle";
 					ctx.fillStyle = "#000";
-					ctx.fillText(key, level * 100 + 20 + fontSize, layer * 50 + 20 + fontSize)
+					ctx.fillText(key, level * 100 + 20 + fontSize, layer * 50 + 20 + fontSize);
+
+					drawn.add(key);
 
 					if ((conversation as any).next) {
 						const lin = conversation as SummatiaConversationLinear;
