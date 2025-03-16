@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'preact/hooks'
 import './app.css'
-import SummatiaCanvas from './components/canvas';
 import { Summatia, SummatiaConversationBranch, SummatiaConversationLinear } from './types/summatia';
 import { Bitfield } from './types/bitfield';
 import { JSX } from 'preact/jsx-runtime';
@@ -47,67 +46,96 @@ export function App() {
 
   if (!data) return <></>;
 
-	const children: JSX.Element[] = [];
+	const [collapsed, setCollapsed] = useState(new Set<string>());
+	const [children, setChildren] = useState<JSX.Element[]>([]);
+	const [cacheColorMap, setCacheColorMap] = useState(new Map<string, [string, string]>());
 
-	const drawn = new Set<string>();
-	const layerMap = new Map<string, number>();
-	const levelMap = new Map<string, number>();
-	const colorMap = new Map<string, [string, string]>();
-	for (const entry of data.entryPoints) {
-		const levels: ({ key: string, looped: boolean, color: [string, string] } | undefined)[][] = [];
-		layerMap.set(entry, 0);
-		levelMap.set(entry, 0);
-		const color = randomDarkHSV();
-		colorMap.set(entry, [color, color]);
-		const stack = [entry];
-		let key: string | undefined;
-		while (key = stack.pop()) {
-			if (drawn.has(key)) continue;
+	useEffect(() => {
+		const ch = [];
+
+		const drawn = new Set<string>();
+		const layerMap = new Map<string, number>();
+		const levelMap = new Map<string, number>();
+		const colorMap = new Map<string, [string, string]>();
+		const cacheMap = new Map(cacheColorMap);
+	
+		let levels: ({ key: string, looped: boolean, color: [string, string] } | undefined)[][];
+	
+		// recursive DFS
+		const processKey: (key: string) => number = (key: string) => {
 			const layer = layerMap.get(key)!;
 			const level = levelMap.get(key)!;
-			const color = colorMap.get(key)!;
+			const directlyUseColor = cacheColorMap.has(key);
+			const color = cacheColorMap.get(key) || colorMap.get(key)!;
 			const conversation = data.conversation.get(key);
 
+			if (!directlyUseColor) cacheMap.set(key, color);
+	
 			if (!levels[level]) levels[level] = [];
 			while (levels[level].length < layer)
 				levels[level].push(undefined);
 			//if (levels[level].length < layer) levels[level].push(...Array(levels[level].length - layer).fill(undefined));
 			if (drawn.has(key)) {
 				levels[level][layer] = { key, looped: true, color };
-				continue;
+				return 1;
 			}
 			levels[level][layer] = { key, looped: false, color };
-
+			if (collapsed.has(key)) return 1;
+	
 			drawn.add(key);
-
+	
 			if ((conversation as any).next) {
 				const lin = conversation as SummatiaConversationLinear;
 				layerMap.set(lin.next, layer);
 				levelMap.set(lin.next, level + 1);
 				colorMap.set(lin.next, [color[1], color[1]]);
-				stack.push(lin.next);
+				return processKey(lin.next);
 			} else if ((conversation as any).responses) {
 				const bra = conversation as SummatiaConversationBranch;
-				for (let ii = bra.responses.length - 1; ii >= 0; ii--) {
+				let span = 0;
+				for (let ii = 0; ii < bra.responses.length; ii++) {
 					const res = bra.responses[ii];
-					layerMap.set(res.next, layer + ii);
+					layerMap.set(res.next, layer + span);
 					levelMap.set(res.next, level + 1);
-					colorMap.set(res.next, [color[1], randomDarkHSV()]);
-					stack.push(res.next);
+					colorMap.set(res.next, directlyUseColor ? color : [color[1], randomDarkHSV()]);
+					span += processKey(res.next);
 				}
+				return span;
 			}
-		}
-
-		// create elements from levels
-		const levelsHTML = levels.map((level, ii) => {
-			const cells = level.map(node => {
-				if (node) return <div className={"conversation-cell" + (node.looped ? " exist" : "")} key={node.key} style={{ background: `linear-gradient(to right, ${node.color[0]}, ${node.color[1]})` }}>{node.key}</div>;
-				else return <div className="conversation-cell" key={node} dangerouslySetInnerHTML={{ __html: "&nbsp;" }}></div>;
+			return 1;
+		};
+	
+		for (const entry of data.entryPoints) {
+			levels = [];
+			layerMap.set(entry, 0);
+			levelMap.set(entry, 0);
+			const color = randomDarkHSV();
+			colorMap.set(entry, [color, color]);
+			processKey(entry);
+	
+			// create elements from levels
+			const levelsHTML = levels.map((level, ii) => {
+				const cells = level.map((node, jj) => {
+					if (node) return <div
+							className={"conversation-cell real" + (node.looped ? " exist" : "")}
+							key={node.key + jj}
+							style={{ background: `linear-gradient(to right, ${node.color[0]}, ${node.color[1]})` }}
+							onClick={() => {
+								const set = new Set(collapsed);
+								if (set.has(node.key)) set.delete(node.key);
+								else set.add(node.key);
+								setCollapsed(set);
+							}}
+						>{collapsed.has(node.key) ? (node.key.slice(0, 8) + "...") : node.key}</div>;
+					else return <div className="conversation-cell" key={jj} dangerouslySetInnerHTML={{ __html: "&nbsp;" }}></div>;
+				});
+				return <div className="conversation-level" key={ii}>{cells}</div>;
 			});
-			return <div className="conversation-level" key={ii}>{cells}</div>;
-		});
-		children.push(<div className="conversation-layer">{levelsHTML}</div>);
-	}
+			ch.push(<div className="conversation-layer">{levelsHTML}</div>);
+		}
+		setChildren(ch);
+		setCacheColorMap(cacheMap);
+	}, [collapsed]);
 
   if (!id) return <>{children}</>;
 

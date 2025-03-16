@@ -18,3 +18,7 @@
 .conversation-cell.exist {
 	opacity: 0.5;
 }
+
+.conversation-cell.real:hover {
+	cursor: pointer;
+}
