@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 import './app.css'
 import { Summatia, SummatiaConversationBranch, SummatiaConversationLinear } from './types/summatia';
 import { Bitfield } from './types/bitfield';
 import { JSX } from 'preact/jsx-runtime';
 import { randomDarkHSV } from './helpers/color';
+import Preview from './components/preview';
 
 export function App() {
+	const cell = useRef<HTMLDivElement>(null);
   const [id, setId] = useState("");
+	const [clicked, setClicked] = useState("");
   const [data, setData] = useState<Summatia | undefined>();
 
   useEffect(() => {
@@ -29,6 +32,7 @@ export function App() {
         if (key == "emotions") continue;
         ids.add(key);
         const conversation = json[key];
+				if (typeof conversation.emotion == "string") conversation.emotion = summatia.emotionPreset.get(conversation.emotion);
         conversation.emotion = new Bitfield(conversation.emotion);
         summatia.conversation.set(key, conversation);
         if (conversation.next) hasParent.add(conversation.next);
@@ -62,14 +66,15 @@ export function App() {
 		let levels: ({ key: string, looped: boolean, color: [string, string] } | undefined)[][];
 	
 		// recursive DFS
-		const processKey: (key: string) => number = (key: string) => {
+		const processKey: (key: string, parent?: string) => number = (key: string, parent?: string) => {
+			const colorKey = key + (parent ? "|" + parent : "");
 			const layer = layerMap.get(key)!;
 			const level = levelMap.get(key)!;
-			const directlyUseColor = cacheColorMap.has(key);
-			const color = cacheColorMap.get(key) || colorMap.get(key)!;
+			const directlyUseColor = cacheColorMap.has(colorKey);
+			const color = cacheColorMap.get(colorKey) || colorMap.get(colorKey)!;
 			const conversation = data.conversation.get(key);
 
-			if (!directlyUseColor) cacheMap.set(key, color);
+			if (!directlyUseColor) cacheMap.set(colorKey, color);
 	
 			if (!levels[level]) levels[level] = [];
 			while (levels[level].length < layer)
@@ -88,8 +93,8 @@ export function App() {
 				const lin = conversation as SummatiaConversationLinear;
 				layerMap.set(lin.next, layer);
 				levelMap.set(lin.next, level + 1);
-				colorMap.set(lin.next, [color[1], color[1]]);
-				return processKey(lin.next);
+				colorMap.set(`${lin.next}|${key}`, [color[1], color[1]]);
+				return processKey(lin.next, key);
 			} else if ((conversation as any).responses) {
 				const bra = conversation as SummatiaConversationBranch;
 				let span = 0;
@@ -97,8 +102,8 @@ export function App() {
 					const res = bra.responses[ii];
 					layerMap.set(res.next, layer + span);
 					levelMap.set(res.next, level + 1);
-					colorMap.set(res.next, directlyUseColor ? color : [color[1], randomDarkHSV()]);
-					span += processKey(res.next);
+					colorMap.set(`${res.next}|${key}`, directlyUseColor ? color : [color[1], randomDarkHSV()]);
+					span += processKey(res.next, key);
 				}
 				return span;
 			}
@@ -117,15 +122,30 @@ export function App() {
 			const levelsHTML = levels.map((level, ii) => {
 				const cells = level.map((node, jj) => {
 					if (node) return <div
-							className={"conversation-cell real" + (node.looped ? " exist" : "")}
+							className={"conversation-cell real" + (node.looped ? " exist" : "") + (node.key == clicked ? " selected" : "")}
 							key={node.key + jj}
-							style={{ background: `linear-gradient(to right, ${node.color[0]}, ${node.color[1]})` }}
-							onClick={() => {
+							style={node.key == clicked ? { background: "#fff", color: "#000" } : { background: `linear-gradient(to right, ${node.color[0]}, ${node.color[1]})` }}
+							onClick={ev => {
+								if (ev.button == 0) {
+									if (clicked == node.key) setClicked("");
+									else {
+										setClicked(node.key);
+										setId(node.key);
+									}
+								}
+							}}
+							onMouseEnter={() => {
+								if (!clicked)
+									setId(node.key);
+							}}
+							onContextMenu={ev => {
+								ev.preventDefault();
 								const set = new Set(collapsed);
 								if (set.has(node.key)) set.delete(node.key);
 								else set.add(node.key);
 								setCollapsed(set);
 							}}
+							ref={node.key == clicked ? cell : undefined}
 						>{collapsed.has(node.key) ? (node.key.slice(0, 8) + "...") : node.key}</div>;
 					else return <div className="conversation-cell" key={jj} dangerouslySetInnerHTML={{ __html: "&nbsp;" }}></div>;
 				});
@@ -135,9 +155,13 @@ export function App() {
 		}
 		setChildren(ch);
 		setCacheColorMap(cacheMap);
-	}, [collapsed]);
+	}, [collapsed, clicked]);
 
-  if (!id) return <>{children}</>;
-
-  return <></>;
+  return <>
+		{children}
+		{id && <Preview data={data} entry={id} next={next => {
+			setClicked(next);
+			setId(next);
+		}} scroll={() => cell.current?.scrollIntoView()} />}
+	</>;
 }

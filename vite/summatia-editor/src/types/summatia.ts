@@ -8,7 +8,7 @@ export type Summatia = {
 
 type SummatiaConversation = {
 	message: string;
-	emotion: Bitfield | string;
+	emotion: Bitfield;
 }
 
 export type SummatiaConversationLinear = SummatiaConversation & { next: string };

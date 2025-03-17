@@ -13,6 +13,7 @@
 	padding: 1vmax;
 	white-space: nowrap;
 	margin: 1vmax 0;
+	transition: border ease .25s;
 }
 
 .conversation-cell.exist {
@@ -21,4 +22,48 @@
 
 .conversation-cell.real:hover {
 	cursor: pointer;
+}
+
+.preview {
+	padding: 1vmax;
+	background-color: #120d35;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100vw;
+	display: flex;
+	max-height: 20vh;
+}
+
+.preview-text {
+	flex: 1;
+	overflow: scroll;
+}
+
+.preview-key {
+	opacity: .5;
+}
+
+.preview-key:hover {
+	cursor: pointer;
+}
+
+.preview-next {
+	color: #55aaff;
+}
+
+.preview-next:hover {
+	cursor: pointer;
+}
+
+.restaurant {
+	max-height: 100%;
+	display: flex;
+	margin: 0;
+	max-width: 40vw;
+}
+
+.restaurant img {
+	border: .25vmax solid #524c7b;
+	border-radius: 1vmax;
 }

@@ -36,7 +36,7 @@ export enum Emotion {
 	HANDS_HEAD = 1 << 13,
 	HANDS_FACE = 1 << 14,
 	EYES_DOWN = 1 << 15,
-	EYES_LEFT = 1 << 16,
-	EYES_RIGHT = 1 << 17,
-	TEARS = 1 << 18,
+	EYES_LEFT = 1 << 17,
+	EYES_RIGHT = 1 << 18,
+	TEARS = 1 << 19,
 }
