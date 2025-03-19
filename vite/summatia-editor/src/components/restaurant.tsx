@@ -1,9 +1,12 @@
 import { useEffect, useState } from "preact/hooks";
+import { JSX } from "preact/jsx-runtime";
+import { Emotion } from "../types/bitfield";
 
 let svg: string | undefined;
 
-export default function Restaurant(props: { emotion: number }) {
+export default function Restaurant(props: { children: JSX.Element, emotion: number, toggleLarge: () => void, onToggleCheck: (bit: number) => void }) {
 	const [svgData, setSvgData] = useState("");
+	const [checkboxes, setCheckboxes] = useState<JSX.Element[]>([]);
 
 	useEffect(() => {
 		(async () => {
@@ -54,9 +57,23 @@ export default function Restaurant(props: { emotion: number }) {
 
 			setSvgData('data:image/svg+xml;base64,' + btoa(div.innerHTML));
 		})();
+
+		const checkboxes: JSX.Element[] = [];
+		for (const key of Object.keys(Emotion)) {
+			if (typeof key === "number" || !isNaN(Number(key))) continue;
+			const val = Emotion[key as keyof typeof Emotion];
+			checkboxes.push(<>
+				<input type="checkbox" checked={!!(val & props.emotion)} onClick={() => props.onToggleCheck(val)} />
+				<label>{key.toLowerCase().replace(/_/g, " ")}</label>
+				<br />
+			</>);
+		}
+		setCheckboxes(checkboxes);
 	}, [props.emotion]);
 
 	return <div className="restaurant">
-		<img src={svgData} />
+		<img src={svgData} onClick={props.toggleLarge} />
+		<div className="emotion-edit">{checkboxes}</div>
+		{props.children}
 	</div>;
 }

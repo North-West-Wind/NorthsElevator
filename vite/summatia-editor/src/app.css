@@ -33,9 +33,11 @@
 	width: 100vw;
 	display: flex;
 	max-height: 20vh;
+	overflow: scroll;
 }
 
 .preview-text {
+	padding: 1vmax;
 	flex: 1;
 	overflow: scroll;
 }
@@ -60,10 +62,15 @@
 	max-height: 100%;
 	display: flex;
 	margin: 0;
-	max-width: 40vw;
+	position: relative;
 }
 
 .restaurant img {
 	border: .25vmax solid #524c7b;
 	border-radius: 1vmax;
+}
+
+.restaurant .emotion-edit {
+	padding: 1vmax;
+	overflow: scroll;
 }
