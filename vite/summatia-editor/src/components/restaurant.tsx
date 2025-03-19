@@ -64,7 +64,7 @@ export default function Restaurant(props: { children: JSX.Element, emotion: numb
 			const val = Emotion[key as keyof typeof Emotion];
 			checkboxes.push(<>
 				<input type="checkbox" checked={!!(val & props.emotion)} onClick={() => props.onToggleCheck(val)} />
-				<label>{key.toLowerCase().replace(/_/g, " ")}</label>
+				<label onClick={() => props.onToggleCheck(val)}>{key.toLowerCase().replace(/_/g, " ")}</label>
 				<br />
 			</>);
 		}

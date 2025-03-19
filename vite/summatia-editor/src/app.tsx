@@ -136,6 +136,9 @@ export function App() {
 		{id && <Preview data={data} entry={id} next={next => {
 			setClicked(next);
 			setId(next);
-		}} scroll={() => cell.current?.scrollIntoView()} />}
+		}} scroll={() => cell.current?.scrollIntoView()} renameEntry={name => {
+			data.conversation.set(name, data.conversation.get(id)!);
+			setId(name);
+		}}/>}
 	</>;
 }

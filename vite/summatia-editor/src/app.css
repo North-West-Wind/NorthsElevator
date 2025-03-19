@@ -74,3 +74,51 @@
 	padding: 1vmax;
 	overflow: scroll;
 }
+
+.restaurant .emotion-edit input:hover {
+	cursor: pointer;
+}
+
+.restaurant .emotion-edit label:hover {
+	cursor: pointer;
+	filter: brightness(80%);
+}
+
+.togglable-input {
+	display: flex;
+	cursor: pointer;
+}
+
+.togglable-input input {
+	outline: none;
+	border: none;
+	background-color: transparent;
+	padding: 0;
+	font-size: 1.25vmax;
+}
+
+.togglable-input input[disabled] {
+	color: #fff;
+	pointer-events: none;
+}
+
+.togglable-input input[disabled].preview-next {
+	color: #55aaff;
+}
+
+.togglable-input input.edit {
+	background-color: #333;
+}
+
+.togglable-input .button {
+	font-size: 1vmax;
+	padding: .25vmax;
+	margin-right: .5vmax;
+	background-color: #fff;
+	color: #000;
+}
+
+.togglable-input .button:hover {
+	cursor: pointer;
+	filter: brightness(80%);
+}
