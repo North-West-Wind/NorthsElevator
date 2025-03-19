@@ -86,7 +86,6 @@
 
 .togglable-input {
 	display: flex;
-	cursor: pointer;
 }
 
 .togglable-input input {

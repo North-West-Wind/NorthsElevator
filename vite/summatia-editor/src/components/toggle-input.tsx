@@ -1,10 +1,11 @@
 import { ChangeEvent, KeyboardEvent, MouseEvent } from "preact/compat";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 export default function TogglableInput(props: { className?: string, value: string, onCommit: (value: string) => void, onClick?: () => void }) {
 	const [value, setValue] = useState(props.value);
 	const [edit, setEdit] = useState(false);
 	const [size, setSize] = useState(value.length);
+	const ref = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
 		setValue(props.value);
@@ -22,6 +23,7 @@ export default function TogglableInput(props: { className?: string, value: strin
 	const toggleEdit = (set?: boolean) => {
 		if (set === undefined) {
 			if (edit) props.onCommit(value);
+			else ref.current?.focus();
 			setEdit(!edit);
 		} else {
 			if (edit != set && !set) props.onCommit(value);
@@ -39,7 +41,7 @@ export default function TogglableInput(props: { className?: string, value: strin
 		else toggleEdit(true);
 	};
 
-	return <div className="togglable-input" onClick={() => edit ? onClick() : ""}>
+	return <div className="togglable-input" onClick={() => !edit ? onClick() : ""} style={edit ? {} : { cursor: "pointer" }}>
 		<div className="button" onClick={onClickEdit}>{edit ? "Save" : "Edit"}</div>
 		<input
 			value={value}
@@ -47,7 +49,8 @@ export default function TogglableInput(props: { className?: string, value: strin
 			className={(props.className || "") + (edit ? " edit" : "")}
 			onChange={onChange} style={{ width: `${size * 1.25}vmax` }}
 			onKeyDown={onKeyDown}
-			onClick={onClick}
+			onClick={() => !edit ? onClick() : ""}
+			ref={ref}
 		/>
 	</div>;
 }
