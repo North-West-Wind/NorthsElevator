@@ -17,6 +17,10 @@ export class Bitfield {
 	num() {
 		return this.value;
 	}
+
+	copy() {
+		return new Bitfield(this.num());
+	}
 }
 
 export enum Emotion {

@@ -48,6 +48,7 @@ export class Summatia {
 			const conversation = data[key] as (SummatiaConversation | SummatiaDataConversation);
 			if (typeof conversation.emotion == "string") conversation.emotion = this.emotionPreset.getA(conversation.emotion)!;
 			conversation.emotion = new Bitfield(conversation.emotion as number);
+			if (typeof conversation.emotion == "string") console.log(`emotion for ${key} is string`);
 			this.conversation.set(key, conversation as SummatiaConversationEither<true>);
 			if ((conversation as any).next) hasParent.add((conversation as SummatiaConversationLinear).next);
 			else if ((conversation as any).responses)
@@ -68,7 +69,9 @@ export class Summatia {
 			data.emotions![emotion] = num;
 		}
 		for (const [key, conversation] of this.conversation.entries()) {
-			let unconverted = conversation as SummatiaConversationEither;
+			let unconverted = { message: conversation.message, emotion: conversation.emotion } as SummatiaConversationEither;
+			if ((conversation as any).next) (unconverted as SummatiaConversationLinear).next = (conversation as SummatiaConversationLinear).next;
+			if ((conversation as any).responses) (unconverted as SummatiaConversationBranch).responses = (conversation as SummatiaConversationBranch).responses;
 			unconverted.emotion = conversation.emotion.num();
 			if (this.emotionPreset.hasB(unconverted.emotion)) unconverted.emotion = this.emotionPreset.getB(unconverted.emotion)!;
 			data[key] = unconverted as SummatiaConversationEither<false>;

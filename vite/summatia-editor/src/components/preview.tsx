@@ -3,7 +3,7 @@ import { Summatia, SummatiaConversationBranch, SummatiaConversationEither, Summa
 import Restaurant from "./restaurant";
 import TogglableInput from "./toggle-input";
 
-export default function Preview(props: { data: Summatia, entry: string, renameEntry: (name: string) => void, next: (next: string) => void, scroll: () => void }) {
+export default function Preview(props: { data: Summatia, entry: string, renameEntry: (name: string) => void, next: (next: string) => void, scroll: () => void, save: () => void, download: () => void }) {
 	const [large, setLarge] = useState(false);
 	const [entry, setEntry] = useState(props.entry);
 	const [conv, setConv] = useState<SummatiaConversationEither<true>>(props.data.conversation.get(props.entry)!);
@@ -12,6 +12,14 @@ export default function Preview(props: { data: Summatia, entry: string, renameEn
 	const [next, setNext] = useState((conv as any).next as (string | undefined));
 	const [responses, setResponses] = useState((conv as any).responses as (SummatiaResponse[] | undefined));
 
+	const save = () => {
+		// save entry if not exist
+		if (!props.data.conversation.has(entry) && message) {
+			props.data.conversation.set(entry, conv);
+		}
+		props.save();
+	};
+
 	useEffect(() => {
 		// save entry if not exist
 		if (!props.data.conversation.has(entry) && message) {
@@ -19,7 +27,7 @@ export default function Preview(props: { data: Summatia, entry: string, renameEn
 		}
 		setEntry(props.entry);
 		// create entry based on previous if not exist
-		let newConv = props.data.conversation.get(props.entry) || { message: "", emotion: conv.emotion };
+		let newConv = props.data.conversation.get(props.entry) || { message: "", emotion: conv.emotion.copy() };
 		setConv(newConv);
 		setEmotion(newConv.emotion.num());
 		setMessage(newConv.message);
@@ -83,6 +91,16 @@ export default function Preview(props: { data: Summatia, entry: string, renameEn
 		}
 	};
 
+	const moveBranch = (index: number, up: boolean) => {
+		const conve = conv as SummatiaConversationBranch;
+		if (up && index == 0 || !up && index == conve.responses.length - 1) return;
+		const tmp = conve.responses[index];
+		const swap = up ? index - 1 : index + 1;
+		conve.responses[index] = conve.responses[swap];
+		conve.responses[swap] = tmp;
+		setResponses(Array.from(conve.responses));
+	};
+
 	return <div className="preview" style={large ? { maxHeight: "40vh" } : {}}>
 		<Restaurant emotion={emotion} toggleLarge={() => setLarge(!large)} onToggleCheck={changeEmotion}>
 			<div className="preview-text">
@@ -104,7 +122,11 @@ export default function Preview(props: { data: Summatia, entry: string, renameEn
 							value={res.next}
 							onCommit={(val) => changeResponse(res.message, val, ii)}
 						/>
-						<div className="preview-button delete" onClick={() => deleteBranch(ii)}>Delete</div>
+						<div className="preview-button-container">
+							<div className={"preview-button move" + (ii == 0 ? " disabled" : "")} onClick={() => moveBranch(ii, true)}>▲</div>
+							<div className={"preview-button move" + (ii == responses.length - 1 ? " disabled" : "")} onClick={() => moveBranch(ii, false)}>▼</div>
+							<div className="preview-button delete" onClick={() => deleteBranch(ii)}>Delete</div>
+						</div>
 					</>
 				})}
 				{!next && !responses && <div>
@@ -121,6 +143,12 @@ export default function Preview(props: { data: Summatia, entry: string, renameEn
 				{responses && <div className="preview-button response" onClick={addBranch}>
 					Add Response
 				</div>}
+				<div className="preview-button save" onClick={save}>
+					Save
+				</div>
+				<div className="preview-button save" onClick={props.download}>
+					Download
+				</div>
 			</div>
 		</Restaurant>
 		

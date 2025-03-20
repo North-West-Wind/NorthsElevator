@@ -68,6 +68,10 @@
 	justify-content: center;
 }
 
+.preview-button-container {
+	display: flex;
+}
+
 .preview-button {
 	padding: 1vmax;
 	margin: 1vmax;
@@ -90,6 +94,19 @@
 	background-color: #005aa3;
 }
 
+.preview-button.disabled {
+	filter: grayscale();
+}
+
+.preview-button.move {
+	background-color: #0090a3;
+	width: fit-content;
+	font-size: 1.25vmax;
+	padding: .25vmax;
+	margin: 0;
+	margin-bottom: 1vmax;
+}
+
 .preview-button.delete {
 	background-color: #ff0000;
 	width: fit-content;
@@ -97,6 +114,10 @@
 	padding: .25vmax;
 	margin: 0;
 	margin-bottom: 1vmax;
+}
+
+.preview-button.save {
+	background-color: #47a300;
 }
 
 .restaurant {

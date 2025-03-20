@@ -30,11 +30,9 @@ export default function Restaurant(props: { children: JSX.Element | JSX.Element[
 		
 			(div.querySelector("#blush") as HTMLElement).style.opacity = emotions & (256) ? "1" : "0";
 		
-			if (emotions & (512 + 1024)) {
-				(div.querySelector(".left-brow") as HTMLElement).style.transform = `rotate(${emotions & 512 ? "-10" : "20"}deg)`;
-				(div.querySelector(".right-brow") as HTMLElement).style.transform = `rotate(${emotions & 512 ? "10" : "-20"}deg)`;
-			} else
-				div.querySelectorAll(".brow").forEach(item => (item as HTMLElement).style.transform = "");
+			div.querySelector<SVGGElement>("#brows-angry")!.style.display = emotions & Emotion.BROWS_ANGRY ? "inline" : "none";
+			div.querySelector<SVGGElement>("#brows-worried")!.style.display = emotions & Emotion.BROWS_WORRIED ? "inline" : "none";
+			div.querySelector<SVGGElement>("#brows")!.style.display = !(emotions & (Emotion.BROWS_ANGRY | Emotion.BROWS_WORRIED)) ? "inline" : "none";
 		
 			div.querySelectorAll(".summatia-head").forEach(item => (item as HTMLElement).style.transform = `translateY(${emotions & 2048 ? "5" : "0"}px)`);
 		

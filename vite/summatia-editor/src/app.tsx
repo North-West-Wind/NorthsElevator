@@ -7,19 +7,63 @@ import Preview from './components/preview';
 
 export function App() {
 	const cell = useRef<HTMLDivElement>(null);
-  const [id, setId] = useState("");
+  const [id, setId] = useState(window.location.hash.slice(1));
 	const [clicked, setClicked] = useState("");
   const [data, setData] = useState<Summatia | undefined>();
+
+	const save = () => {
+		if (!data) return;
+		window.localStorage.setItem("summatia-editor", JSON.stringify(data.toData()));
+		alert("Saved to local storage");
+	};
+
+	const download = () => {
+		if (!data) return;
+		const element = document.createElement('a');
+		element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(data)));
+		element.setAttribute('download', "summatia.json");
+		element.style.display = 'none';
+		document.body.appendChild(element);
+		element.click();
+		document.body.removeChild(element);
+		window.localStorage.setItem("summatiaData", JSON.stringify(data));
+	};
 
   useEffect(() => {
 		const localData = window.localStorage.getItem("summatia-editor");
 		if (localData) {
-			
+			const summatia = new Summatia(JSON.parse(localData));
+			setData(summatia);
+		} else {
+			fetch("/data/summatia.json").then(res => res.json()).then(json => {
+				const summatia = new Summatia(json);
+				setData(summatia);
+			});
 		}
-    fetch("/data/summatia.json").then(res => res.json()).then(json => {
-      const summatia = new Summatia(json);
-      setData(summatia);
-    });
+
+		window.onpopstate = (ev) => {
+			setId(ev.state.id || "");
+			setClicked(ev.state.id || "");
+		};
+
+		const onKeyDown = (ev: KeyboardEvent) => {
+			if (!data) return;
+			if (ev.ctrlKey) {
+				switch (ev.key) {
+					case "s":
+						ev.preventDefault();
+						save();
+						break;
+					case "e":
+						// download file
+						ev.preventDefault();
+						download();
+						break;
+				}
+			}
+		};
+		window.addEventListener("keydown", onKeyDown);
+		return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
   if (!data) return <></>;
@@ -107,6 +151,7 @@ export function App() {
 									else {
 										setClicked(node.key);
 										setId(node.key);
+										window.history.pushState({ id: node.key }, "", `#${node.key}`);
 									}
 								}
 							}}
@@ -142,6 +187,6 @@ export function App() {
 		}} scroll={() => cell.current?.scrollIntoView()} renameEntry={name => {
 			data.conversation.set(name, data.conversation.get(id)!);
 			setId(name);
-		}}/>}
+		}} save={save} download={download}/>}
 	</>;
 }
