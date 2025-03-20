@@ -135,6 +135,7 @@ export function App() {
 
   return <>
 		{children}
+		{id && <div className="preview-offset"></div>}
 		{id && <Preview data={data} entry={id} next={next => {
 			setClicked(next);
 			setId(next);

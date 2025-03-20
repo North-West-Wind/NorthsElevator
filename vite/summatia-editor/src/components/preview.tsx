@@ -75,6 +75,14 @@ export default function Preview(props: { data: Summatia, entry: string, renameEn
 		setResponses(Array.from(conve.responses));
 	};
 
+	const deleteBranch = (index: number) => {
+		if (confirm("Are you sure?")) {
+			const conve = conv as SummatiaConversationBranch;
+			conve.responses.splice(index, 1);
+			setResponses(Array.from(conve.responses));
+		}
+	};
+
 	return <div className="preview" style={large ? { maxHeight: "40vh" } : {}}>
 		<Restaurant emotion={emotion} toggleLarge={() => setLarge(!large)} onToggleCheck={changeEmotion}>
 			<div className="preview-text">
@@ -96,6 +104,7 @@ export default function Preview(props: { data: Summatia, entry: string, renameEn
 							value={res.next}
 							onCommit={(val) => changeResponse(res.message, val, ii)}
 						/>
+						<div className="preview-button delete" onClick={() => deleteBranch(ii)}>Delete</div>
 					</>
 				})}
 				{!next && !responses && <div>

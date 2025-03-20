@@ -36,6 +36,10 @@
 	overflow: scroll;
 }
 
+.preview-offset {
+	height: 50vh;
+}
+
 .preview-text {
 	padding: 1vmax;
 	overflow: scroll;
@@ -84,6 +88,15 @@
 
 .preview-button.response {
 	background-color: #005aa3;
+}
+
+.preview-button.delete {
+	background-color: #ff0000;
+	width: fit-content;
+	font-size: 1.25vmax;
+	padding: .25vmax;
+	margin: 0;
+	margin-bottom: 1vmax;
 }
 
 .restaurant {

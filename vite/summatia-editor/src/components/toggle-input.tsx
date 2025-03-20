@@ -19,19 +19,17 @@ export default function TogglableInput(props: { className?: string, value: strin
 
 	const onKeyDown = (ev: KeyboardEvent<HTMLInputElement>) => {
 		if (ev.key == "Enter" && edit) {
-			ev.preventDefault();
-			ev.stopPropagation();
-			toggleEdit(false);
+			toggleEdit(false, ev.currentTarget.value);
 		}
 	};
 
-	const toggleEdit = (set?: boolean) => {
+	const toggleEdit = (set?: boolean, commit = value) => {
 		if (set === undefined) {
-			if (edit) props.onCommit(value);
+			if (edit) props.onCommit(commit);
 			else ref.current?.focus();
 			setEdit(!edit);
 		} else {
-			if (edit != set && !set) props.onCommit(value);
+			if (edit != set && !set) props.onCommit(commit);
 			setEdit(set);
 		}
 	};
