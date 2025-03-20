@@ -38,7 +38,6 @@
 
 .preview-text {
 	padding: 1vmax;
-	flex: 1;
 	overflow: scroll;
 }
 
@@ -56,6 +55,35 @@
 
 .preview-next:hover {
 	cursor: pointer;
+}
+
+.preview-modify {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.preview-button {
+	padding: 1vmax;
+	margin: 1vmax;
+}
+
+.preview-button:hover {
+	filter: brightness(80%);
+	cursor: pointer;
+}
+
+.preview-button.linear {
+	background-color: #10a300;
+}
+
+.preview-button.branch {
+	background-color: #a36200;
+}
+
+.preview-button.response {
+	background-color: #005aa3;
 }
 
 .restaurant {

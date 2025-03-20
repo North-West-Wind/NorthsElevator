@@ -13,7 +13,7 @@ type SummatiaDataConversation = {
 
 export type SummatiaConversationLinear<Converted = true | false> = (Converted extends true ? SummatiaConversation : SummatiaDataConversation) & { next: string };
 export type SummatiaConversationBranch<Converted = true | false> = (Converted extends true ? SummatiaConversation : SummatiaDataConversation) & { responses: SummatiaResponse[] };
-export type SummatiaConversationEither<Converted = true | false> = SummatiaConversationLinear<Converted> | SummatiaConversationBranch<Converted>;
+export type SummatiaConversationEither<Converted = true | false> = SummatiaConversationLinear<Converted> | SummatiaConversationBranch<Converted> | (Converted extends true ? SummatiaConversation : SummatiaDataConversation);
 
 export type SummatiaResponse = {
 	message: string;

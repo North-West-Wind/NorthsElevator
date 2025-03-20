@@ -4,7 +4,7 @@ import { Emotion } from "../types/bitfield";
 
 let svg: string | undefined;
 
-export default function Restaurant(props: { children: JSX.Element, emotion: number, toggleLarge: () => void, onToggleCheck: (bit: number) => void }) {
+export default function Restaurant(props: { children: JSX.Element | JSX.Element[], emotion: number, toggleLarge: () => void, onToggleCheck: (bit: number) => void }) {
 	const [svgData, setSvgData] = useState("");
 	const [checkboxes, setCheckboxes] = useState<JSX.Element[]>([]);
 

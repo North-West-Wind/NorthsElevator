@@ -9,6 +9,7 @@ export default function TogglableInput(props: { className?: string, value: strin
 
 	useEffect(() => {
 		setValue(props.value);
+		setSize(props.value.length);
 	}, [props.value]);
 
 	const onChange = (ev: ChangeEvent<HTMLInputElement>) => {
@@ -17,7 +18,11 @@ export default function TogglableInput(props: { className?: string, value: strin
 	};
 
 	const onKeyDown = (ev: KeyboardEvent<HTMLInputElement>) => {
-		if (ev.key == "Enter" && edit) setEdit(false);
+		if (ev.key == "Enter" && edit) {
+			ev.preventDefault();
+			ev.stopPropagation();
+			toggleEdit(false);
+		}
 	};
 
 	const toggleEdit = (set?: boolean) => {

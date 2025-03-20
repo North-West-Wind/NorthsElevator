@@ -48,6 +48,8 @@ export function App() {
 			const color = cacheColorMap.get(colorKey) || colorMap.get(colorKey)!;
 			const conversation = data.conversation.get(key);
 
+			if (!conversation) return 1;
+
 			if (!directlyUseColor) cacheMap.set(colorKey, color);
 	
 			if (!levels[level]) levels[level] = [];
