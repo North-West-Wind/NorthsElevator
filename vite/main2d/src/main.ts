@@ -1,8 +1,10 @@
 import { FLOORS } from './constants';
-import { getConfig, wait, writeConfig } from './helpers/control';
+import { getConfig, toggleMusic, wait, writeConfig } from './helpers/control';
 import { disableStylesheet, enableStylesheet } from './helpers/css';
 import { clamp, realOrNotFoundFloor } from './helpers/math';
+import { fetchText } from './helpers/reader';
 import { floor } from './states';
+import { LazyLoader } from './types/misc';
 
 const page = window.location.pathname.split("/").pop();
 let currentFloor = ((Array.from(FLOORS.keys()).indexOf(page == "2d" || !page ? "ground" : page) + 1) || (404 + 1)) - 1, targetFloor = currentFloor;
@@ -21,6 +23,14 @@ const floorButton = document.querySelector<SVGGElement>("#display")!;
 const leftDoor = document.querySelector<SVGRectElement>("#left-door")!;
 const rightDoor = document.querySelector<SVGRectElement>("#right-door")!;
 const floorDisplay = document.querySelector<SVGTSpanElement>("#floor")!;
+const musicButton = document.querySelector<SVGGElement>("#speaker-button")!;
+const musicLight = document.querySelector<SVGCircleElement>("#speaker-light")!;
+const donationBox = document.querySelector<SVGGElement>("#donation")!;
+const suggestionBox = document.querySelector<SVGGElement>("#suggestion-box")!;
+
+// elevator content
+const donationContent = new LazyLoader(() => fetchText("/contents/elevator/donation.html"));
+const suggestionContent = new LazyLoader(() => fetchText("/contents/elevator/suggestion.html"));
 
 // update floor display
 function updateDisplay() {
@@ -60,20 +70,27 @@ async function toggleCloser() {
 }
 
 // toggle html content of current floor
-export async function toggleContent(html?: string) {
+export async function toggleContent(html?: string, noFunc = false) {
   if (info.classList.contains("hidden")) {
     if (html) info.innerHTML = html;
     else info.innerHTML = await floor().content.get();
-    floor().loadContent(info);
+    if (!noFunc) {
+			floor().loadContent(info);
+			floor().functionContent = true;
+		}
     info.classList.remove("hidden");
     await wait(20);
     info.classList.remove("visuallyhidden");
     toggleCloser();
   } else {
     toggleCloser();
-    floor().unloadContent(info);
+		noFunc = !floor().functionContent;
+    if (!noFunc) {
+			floor().unloadContent(info);
+			floor().functionContent = false;
+		}
     info.innerHTML = "";
-    threeToFive();
+    if (!noFunc) threeToFive();
 		function onTransitionEnd() {
 			info.classList.add('hidden');
 			info.removeEventListener("transitionend", onTransitionEnd);
@@ -176,6 +193,26 @@ floorButton.onclick = async () => {
   }
 }
 
+// more button handlers
+musicButton.onmousedown = () => clickOnButton = true;
+musicButton.ontouchstart = () => clickOnButton = true;
+musicButton.onclick = () => {
+	if (toggleMusic()) musicLight.style.fill = "#5acd9c";
+	else  musicLight.style.fill = "#103525";
+};
+
+donationBox.onmousedown = () => clickOnButton = true;
+donationBox.ontouchstart = () => clickOnButton = true;
+donationBox.onclick = async () => {
+	toggleContent(await donationContent.get(), true);
+};
+
+suggestionBox.onmousedown = () => clickOnButton = true;
+suggestionBox.ontouchstart = () => clickOnButton = true;
+suggestionBox.onclick = async () => {
+	toggleContent(await suggestionContent.get(), true);
+};
+
 // touch handlers for mobile support
 let touch = { ix: 0, x: 0, offset: 0 };
 let canTouch = false, mouseDown = false;
@@ -219,7 +256,7 @@ window.ontouchend = (evt) => {
   }
   // click-starter
   if (clickOnButton) clickOnButton = false;
-  else if (touch.x == touch.ix && (state == 0 || state == 5)) anyToThree();
+  else if (touch.x == touch.ix && (state == 0 || state == 5) && info.classList.contains("hidden")) anyToThree();
 }
 window.onmouseup = () => {
   if (touchCheck()) {
@@ -228,7 +265,7 @@ window.onmouseup = () => {
   }
   // click-starter
   if (clickOnButton) clickOnButton = false;
-  else if (touch.x == touch.ix && (state == 0 || state == 5)) anyToThree();
+  else if (touch.x == touch.ix && (state == 0 || state == 5) && info.classList.contains("hidden")) anyToThree();
 }
 const translateBackground = () => {
   const offset = clamp((touch.x - touch.ix) * 100 / window.innerWidth + touch.offset, -maxTrans, maxTrans);

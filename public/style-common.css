@@ -412,3 +412,7 @@ svg * {
 .background svg#summatia * {
 	transition: transform .5s ease, opacity .5s linear;
 }
+
+.info-img {
+	max-width: 80vw;
+}

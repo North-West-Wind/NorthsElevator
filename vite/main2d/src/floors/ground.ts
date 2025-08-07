@@ -1,4 +1,4 @@
-import { getConfig, toggleMusic, toggleSmoothScroll, writeConfig } from "../helpers/control";
+import { getConfig, toggleSmoothScroll, writeConfig } from "../helpers/control";
 import Floor from "../types/floor";
 
 const ID = "ground";
@@ -80,12 +80,6 @@ export default class GroundFloor extends Floor {
 				button.classList.remove("on");
 			}
 		};
-		const musicButton = document.getElementById("toggle-music") as HTMLDivElement;
-		musicButton.onclick = () => {
-			toggleMusic();
-			setButtonText(musicButton, "Music", "music");
-		}
-		setButtonText(musicButton, "Music", "music");
 	
 		const smoothScrollButton = document.getElementById("smooth-scroll") as HTMLDivElement;
 		smoothScrollButton.onclick = () => {

@@ -5,7 +5,6 @@ import fetch from "node-fetch";
 import * as fs from "fs";
 import * as path from "path";
 import { isbot } from "isbot";
-import { translateToEng } from "./translate";
 import compression from "compression";
 import sirv from "sirv";
 
@@ -30,12 +29,13 @@ const app = express();
 
 app.use(compression());
 app.use("/", sirv("./public", { extensions: [] }));
+app.use("/", sirv("./vite/main2d/dist", { extensions: [] }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.set('views', path.resolve(__dirname, "../views"));
 app.set('view engine', 'ejs');
 
 app.get("/api/ping", (_req, res) => res.sendStatus(200));
-app.get("/api/config", (req, res) => {
+app.get("/api/config", (_req, res) => {
 	res.json({
 		pfps: fs.readdirSync(path.join(root, "assets/pfps"), { withFileTypes: true }).filter(ent => ent.isFile()).map(ent => ent.name),
 		info: fs.readdirSync(path.join(root, "contents/info-center"))
@@ -84,20 +84,10 @@ app.get("/uop-editor", (req, res) => {
 	res.sendFile("uop-editor.html", { root });
 });
 
-// translator
-app.get("/translate", async (req, res) => {
-	try {
-		res.json(await translateToEng(<string> req.query.in, !!req.query.deepl));
-	} catch (err) {
-		console.error(err);
-		res.sendStatus(500);
-	}
-});
-
 // elevator
 app.get("/2d/:page?", (req, res, next) => {
 	if (isbot(req.get("user-agent")) || !PAGES.has(req.params.page || "ground")) next();
-	else res.sendFile("main2d.html", { root });
+	else res.sendFile("main2d.html", { root: path.resolve(__dirname, "../vite/main2d/dist") });
 });
 app.get("/:page?", (req, res) => {
 	if (isbot(req.get("user-agent"))) {
