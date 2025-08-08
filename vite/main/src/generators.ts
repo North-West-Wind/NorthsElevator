@@ -1,20 +1,38 @@
 import * as THREE from "three";
 import { FLOORS } from "./constants";
+import { TEXTURE_LOADER } from "./loaders";
+import { isMusic } from "./helpers/control";
+import { configTexture } from "./helpers/macro";
 
-export function makeLift(scene: THREE.Scene, passedInFloor: number) {
-	const { rectL, rectR, rectT, rectB, doorL, doorR } = makeDoors(scene);
-	const { floor } = makeFloor(scene);
-	const { wallFL, wallFR, wallFT, wallL, wallR, ceiling } = makeWalls(scene);
-	const { base, buttonU, buttonD, display } = makeButtons(scene);
-	const { sign } = makeSign(scene);
-	const obj = { rectL, rectR, rectT, rectB, doorL, doorR, floor, wallFL, wallFR, wallFT, wallL, wallR, ceiling, base, buttonU, buttonD, display, sign };
-	if (passedInFloor > 0) {
-			Object.values(obj).forEach(mesh => mesh.position.y += 1000 * passedInFloor);
-	}
-	return obj;
+type LiftObjects = { [key: string]: THREE.Mesh };
+
+let objects: LiftObjects = {};
+
+function addToObjects(...liftObjects: LiftObjects[]) {
+	liftObjects.forEach(obj => {
+		Object.entries(obj).forEach(([key, mesh]) => objects[key] = mesh);
+	});
 }
 
-function makeDoors(scene: THREE.Scene) {
+export function makeLift(scene: THREE.Scene, passedInFloor: number) {
+	addToObjects(
+		makeDoors(scene),
+		makeFloor(scene),
+		makeWalls(scene),
+		makeButtons(scene),
+		makeSpeaker(scene),
+		makeSign(scene)
+	);
+	if (passedInFloor > 0)
+		Object.values(objects).forEach(mesh => mesh.position.y += 1000 * passedInFloor);
+	return objects as LiftObjects & {
+		buttonU: THREE.Mesh<THREE.ExtrudeGeometry, THREE.MeshStandardMaterial, THREE.Object3DEventMap>,
+		buttonD: THREE.Mesh<THREE.ExtrudeGeometry, THREE.MeshStandardMaterial, THREE.Object3DEventMap>,
+		display: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial[], THREE.Object3DEventMap>,
+	};
+}
+
+function makeDoors(scene: THREE.Scene): LiftObjects {
 	const geometryS = new THREE.BoxGeometry(5, 50, 5);
 	const material = new THREE.MeshStandardMaterial({ color: 0x777777 });
 	const rectL = new THREE.Mesh(geometryS, material);
@@ -40,8 +58,8 @@ function makeDoors(scene: THREE.Scene) {
 	return { rectL, rectR, rectT, rectB, doorL, doorR };
 }
 
-function makeFloor(scene: THREE.Scene) {
-	const geometry = new THREE.BoxGeometry(80, 2, 100);
+function makeFloor(scene: THREE.Scene): LiftObjects {
+	const geometry = new THREE.BoxGeometry(100, 2, 100);
 	const material = new THREE.MeshStandardMaterial({ color: 0x98f5a8 });
 	const floor = new THREE.Mesh(geometry, material);
 	floor.position.set(0, -31, 0);
@@ -49,16 +67,16 @@ function makeFloor(scene: THREE.Scene) {
 	return { floor };
 }
 
-function makeWalls(scene: THREE.Scene) {
-	const geometryF = new THREE.BoxGeometry(12.5, 80, 3);
+function makeWalls(scene: THREE.Scene): LiftObjects {
+	const geometryF = new THREE.BoxGeometry(22.5, 80, 3);
 	const material = new THREE.MeshStandardMaterial({ color: 0xfef0bc });
 	const wallFL = new THREE.Mesh(geometryF, material);
 	const wallFR = new THREE.Mesh(geometryF, material);
-	wallFL.position.set(-33.5, -5, -50);
-	wallFR.position.set(33.5, -5, -50);
+	wallFL.position.set(-38.5, -5, -50);
+	wallFR.position.set(38.5, -5, -50);
 	scene.add(wallFL, wallFR);
 
-	const geometryFT = new THREE.BoxGeometry(55, 10, 3);
+	const geometryFT = new THREE.BoxGeometry(75, 10, 3);
 	const wallFT = new THREE.Mesh(geometryFT, material);
 	wallFT.position.set(0, 30, -50);
 	scene.add(wallFT);
@@ -66,18 +84,18 @@ function makeWalls(scene: THREE.Scene) {
 	const geometryS = new THREE.BoxGeometry(3, 80, 100);
 	const wallL = new THREE.Mesh(geometryS, material);
 	const wallR = new THREE.Mesh(geometryS, material);
-	wallL.position.set(-40, -5, 0);
-	wallR.position.set(40, -5, 0);
+	wallL.position.set(-50, -5, 0);
+	wallR.position.set(50, -5, 0);
 	scene.add(wallL, wallR);
 
-	const geometryC = new THREE.BoxGeometry(80, 2, 100);
+	const geometryC = new THREE.BoxGeometry(100, 2, 100);
 	const ceiling = new THREE.Mesh(geometryC, material);
 	ceiling.position.set(0, 36, 0);
 	scene.add(ceiling);
 	return { wallFL, wallFR, wallFT, wallL, wallR, ceiling };
 }
 
-function makeButtons(scene: THREE.Scene) {
+function makeButtons(scene: THREE.Scene): LiftObjects {
 	const geometryB = new THREE.BoxGeometry(5, 10, 0.5);
 	const materialB = new THREE.MeshStandardMaterial({ color: 0xb4eafe });
 	const base = new THREE.Mesh(geometryB, materialB);
@@ -128,7 +146,7 @@ function makeButtons(scene: THREE.Scene) {
 	return { base, buttonU, buttonD, display };
 }
 
-function makeSign(scene: THREE.Scene) {
+function makeSign(scene: THREE.Scene): LiftObjects {
 	var x = document.createElement("canvas");
 	var xc = x.getContext("2d")!;
 	x.width = 360;
@@ -153,9 +171,71 @@ function makeSign(scene: THREE.Scene) {
 			material
 	];
 	const sign = new THREE.Mesh(geometry, materials);
-	sign.position.set(39, 0, -30);
+	sign.position.set(49, 0, -30);
 	scene.add(sign);
 	return { sign };
+}
+
+function makeSpeaker(scene: THREE.Scene): LiftObjects {
+	const speakerGeometry = new THREE.BoxGeometry(15, 10, 8);
+	const speakerMaterial = new THREE.MeshStandardMaterial({ color: 0xe8e2ce });
+	const speaker = new THREE.Mesh(speakerGeometry, speakerMaterial);
+	speaker.position.set(-37.5, 20.5, -50);
+	speaker.setRotationFromAxisAngle(new THREE.Vector3(1, 0, 0), 0.1);
+
+	const ballGeometry = new THREE.SphereGeometry(4);
+	const ballMaterial = new THREE.MeshStandardMaterial({ color: 0xc6bfa9 });
+	const ball = new THREE.Mesh(ballGeometry, ballMaterial);
+	ball.position.set(-37.5, 20.5, -48);
+
+	const musicGeometry = new THREE.BoxGeometry(17, 8, 4);
+	const musicTexture = new THREE.MeshStandardMaterial({ map: TEXTURE_LOADER.load("/assets/textures/elevator/music.svg", configTexture) });
+	const musicMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 });
+	const musicMaterials = [
+			musicMaterial,
+			musicMaterial,
+			musicMaterial,
+			musicMaterial,
+			musicTexture,
+			musicMaterial
+	];
+	const music = new THREE.Mesh(musicGeometry, musicMaterials);
+	music.position.set(-37.5, 10.5, -50);
+
+	const lightGeometry = new THREE.SphereGeometry(3);
+	const lightMaterial = new THREE.MeshBasicMaterial({ color: isMusic() ? 0x5acd9c : 0x103525 });
+	const light = new THREE.Mesh(lightGeometry, lightMaterial);
+	light.position.set(-34.5, 10.5, -50);
+
+	const donationGeometry = new THREE.BoxGeometry(16, 12, 3);
+	const donationTexture = new THREE.MeshStandardMaterial({ map: TEXTURE_LOADER.load("/assets/textures/elevator/donation.svg", configTexture) });
+	const donationMaterial = new THREE.MeshStandardMaterial({ color: 0x1c3750 });
+	const donationMaterials = [
+			donationMaterial,
+			donationMaterial,
+			donationMaterial,
+			donationMaterial,
+			donationTexture,
+			donationMaterial
+	];
+	const donation = new THREE.Mesh(donationGeometry, donationMaterials);
+	donation.position.set(-37.5, -0.5, -49.5);
+
+	const suggestionShape = new THREE.Shape();
+	suggestionShape.moveTo(0, 0);
+	suggestionShape.lineTo(0, 16);
+	suggestionShape.lineTo(-4, 12);
+	suggestionShape.lineTo(-4, 0);
+	suggestionShape.lineTo(0, 0);
+	const suggestionGeometry = new THREE.ExtrudeGeometry(suggestionShape, { depth: 10 });
+	const suggestionMaterial = new THREE.MeshStandardMaterial({ color: 0xc9eff1 });
+	const suggestion = new THREE.Mesh(suggestionGeometry, suggestionMaterial);
+	suggestion.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI * 0.5);
+	suggestion.position.set(-5, -8, 0);
+	suggestion.position.add(new THREE.Vector3(-34.5, -16, -50));
+
+	scene.add(speaker, ball, music, light, donation, suggestion);
+	return { speaker, ball, music, light, donation, suggestion };
 }
 
 export function displayTexture(floor: string | number | null) {

@@ -50,7 +50,7 @@ export const pointLight = new THREE.PointLight(0xfff8be, 450, 300, 1.2);
 pointLight.position.y = cam.position.y = passedInFloor > 0 ? 1000 * passedInFloor : 0;
 scene.add(pointLight);
 export const obj = makeLift(scene, passedInFloor);
-export const { doorL, doorR, buttonU, buttonD, sign, display } = obj;
+export const { doorL, doorR, buttonU, buttonD, sign, display, music, light, donation, suggestion } = obj;
 
 // load target floor and unload the last one
 export async function loadFloor() {

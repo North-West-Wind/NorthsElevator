@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import Floor from "../types/floor";
 import { camera } from "../states";
-import { getConfig, toggleMusic, toggleSmoothScroll, writeConfig } from "../helpers/control";
+import { getConfig, toggleSmoothScroll, writeConfig } from "../helpers/control";
 
 export default class GroundFloor extends Floor {
 	allRains: THREE.Mesh[] = [];
@@ -96,12 +96,6 @@ export function infoPageHandler() {
 			button.classList.remove("on");
 		}
 	};
-	const musicButton = document.getElementById("toggle-music") as HTMLDivElement;
-	musicButton.onclick = () => {
-		toggleMusic();
-		setButtonText(musicButton, "Music", "music");
-	}
-	setButtonText(musicButton, "Music", "music");
 
 	const smoothScrollButton = document.getElementById("smooth-scroll") as HTMLDivElement;
 	smoothScrollButton.onclick = () => {

@@ -28,7 +28,7 @@ async function toggleCloser() {
   }
 }
 
-export async function toggleContent(options?: { html?: string | (() => Promise<string>), page?: string, special?: boolean }) {
+export async function toggleContent(options?: { html?: string | (() => Promise<string>), page?: string, special?: boolean, noFunc?: boolean }) {
   if (div.classList.contains("hidden")) {
     if (options?.html) {
 			if (typeof options.html === "string") div.innerHTML = options.html;
@@ -36,14 +36,20 @@ export async function toggleContent(options?: { html?: string | (() => Promise<s
 		} else if (options?.page !== undefined) div.innerHTML = await (options.special ? STATUS_FLOORS : FLOORS).get(options.page)!.content.get();
     else div.innerHTML = await floor()!.content.get();
     if (options?.page !== undefined) (options.special ? STATUS_FLOORS : FLOORS).get(options.page)!.loadContent(div);
-    else floor()!.loadContent(div);
+    else if (!options?.noFunc) {
+			floor()!.loadContent(div);
+			floor()!.functionFloor = true;
+		}
     div.classList.remove("hidden");
     await wait(20);
     div.classList.remove("visuallyhidden");
     toggleCloser();
   } else {
     toggleCloser();
-    floor()!.unloadContent(div);
+		if (floor()!.functionFloor) {
+    	floor()!.unloadContent(div);
+			floor()!.functionFloor = false;
+		}
     div.innerHTML = "";
 		function onTransitionEnd() {
 			div.classList.add('hidden');

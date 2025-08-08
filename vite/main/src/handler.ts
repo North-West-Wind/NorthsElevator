@@ -1,10 +1,10 @@
 import * as THREE from "three";
-import { scene, buttonD, buttonU, display, doorL, doorR, midX, midY, sign, pointLight, obj, loadFloor } from ".";
+import { scene, buttonD, buttonU, display, doorL, doorR, midX, midY, sign, pointLight, obj, loadFloor, music, light, donation, suggestion } from ".";
 import { toggleContent } from "./helpers/html";
-import { FLOORS } from "./constants";
+import { CONTENTS, FLOORS } from "./constants";
 import { displayTexture } from "./generators";
 import { camera, currentFloor, DEBUG, floor, ratio, rotatedX, rotatedY, started, targetFloor, touched } from "./states";
-import { getConfig, wait } from "./helpers/control";
+import { getConfig, toggleMusic, wait } from "./helpers/control";
 import { clamp } from "./helpers/math";
 
 enum State {
@@ -97,7 +97,7 @@ window.addEventListener("mousemove", (e) => {
 	const mouse2D = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
 	const raycaster = new THREE.Raycaster();
 	raycaster.setFromCamera(mouse2D, camera());
-	const check: THREE.Object3D[] = [buttonU, buttonD, display, sign];
+	const check: THREE.Object3D[] = [buttonU, buttonD, display, sign, music, light, donation, suggestion];
 	if (floor()?.listenMove) check.push(...floor()!.moveCheck());
 	const intersect = raycaster.intersectObjects(check);
 	if (intersect.length > 0) document.body.style.cursor = "pointer";
@@ -118,11 +118,25 @@ function clickEventsCommon(e: { clientX: number, clientY: number }) {
 	const oldTargetFl = targetFl;
 	const currentFl = currentFloor();
 	let button, start = false;
-	if (raycaster.intersectObject(buttonU).length > 0) { button = buttonU; if (currentFl != -1 && targetFl < FLOORS.size - 1) targetFl = targetFloor(targetFl + 1); }
-	else if (raycaster.intersectObject(buttonD).length > 0) { button = buttonD; if (currentFl != -1 && targetFl > 0) targetFl = targetFloor(targetFl - 1); }
-	else if (raycaster.intersectObject(display).length > 0 && currentFl != targetFl && currentFl != -1 && state != State.OPENING && state != State.CLOSING) displayPressed = true;
+	if (raycaster.intersectObject(buttonU).length > 0) {
+		button = buttonU;
+		if (currentFl != -1 && targetFl < FLOORS.size - 1)
+			targetFl = targetFloor(targetFl + 1);
+	} else if (raycaster.intersectObject(buttonD).length > 0) {
+		button = buttonD;
+		if (currentFl != -1 && targetFl > 0)
+			targetFl = targetFloor(targetFl - 1);
+	} else if (raycaster.intersectObject(display).length > 0 && currentFl != targetFl && currentFl != -1 && state != State.OPENING && state != State.CLOSING) displayPressed = true;
 	else if (raycaster.intersectObject(sign).length > 0) {
 		toggleContent({ page: floor()?.special ? floor()!.id : "ground", special: floor()?.special });
+		start = true;
+	} else if (raycaster.intersectObjects([music, light]).length > 0) {
+		(light.material as THREE.MeshBasicMaterial).color.setHex(toggleMusic() ? 0x5acd9c : 0x103525);
+	} else if (raycaster.intersectObject(donation).length > 0) {
+		toggleContent({ html: () => CONTENTS.get(1000)!.get(), noFunc: true });
+		start = true;
+	} else if (raycaster.intersectObject(suggestion).length > 0) {
+		toggleContent({ html: () => CONTENTS.get(1001)!.get(), noFunc: true });
 		start = true;
 	} else if (floor()?.listenClick) {
 		floor()!.clickRaycast(raycaster);

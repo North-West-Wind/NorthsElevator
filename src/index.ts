@@ -30,6 +30,7 @@ const app = express();
 app.use(compression());
 app.use("/", sirv("./public", { extensions: [] }));
 app.use("/", sirv("./vite/main2d/dist", { extensions: [] }));
+app.use("/", sirv("./vite/main/dist", { extensions: [] }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.set('views', path.resolve(__dirname, "../views"));
 app.set('view engine', 'ejs');
@@ -102,7 +103,7 @@ app.get("/:page?", (req, res) => {
 		const content = fs.readFileSync(path.join(root, "contents", filename), { encoding: "utf8" });
 		template = template.replace("{content}", content);
 		res.send(template);
-	} else res.sendFile("main.html", { root });
+	} else res.sendFile("main.html", { root: path.resolve(__dirname, "../vite/main/dist") });
 });
 
 const server = app.listen(process.env.PORT || 3000, async () => {

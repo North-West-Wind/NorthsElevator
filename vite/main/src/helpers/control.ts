@@ -37,8 +37,12 @@ export function getConfig() {
 	return config;
 }
 
+export function isMusic() {
+	return !(document.getElementById("player") as HTMLAudioElement).paused;
+}
+
 export function toggleMusic() {
-	setMusic((document.getElementById("player") as HTMLAudioElement).paused);
+	return setMusic((document.getElementById("player") as HTMLAudioElement).paused);
 }
 
 export function setMusic(state: boolean, noSave = false) {
@@ -49,6 +53,8 @@ export function setMusic(state: boolean, noSave = false) {
 		getConfig().music = state;
 		writeConfig();
 	}
+
+	return state;
 }
 
 export function toggleSmoothScroll() {

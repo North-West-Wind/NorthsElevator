@@ -6,9 +6,8 @@
     "scripts": {
         "deep-install": "npm i && npm-run-all install:*",
         "start": "node out/index.js",
-        "build": "tsc && npm run clean-js && npm-run-all build:* postbuild:*",
+        "build": "tsc && npm-run-all build:* postbuild:*",
         "test": "npm run build && npm start",
-        "clean-js": "for file in public/js/*.js; do rm $file; done",
         "install:main": "cd vite/main && npm i",
         "build:main": "cd vite/main && npm run build",
         "install:uop-editor": "cd uop-editor && npm i",

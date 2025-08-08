@@ -34,3 +34,6 @@ addStatusFloor(new NotFoundFloor());
 
 for (const floor of Array.from(FLOORS.values()).concat(Array.from(STATUS_FLOORS.values())))
 	CONTENTS.set(floor.num, new LazyLoader(() => fetchText(`/contents/${floor.num}-${floor.id}.html`)));
+
+CONTENTS.set(1000, new LazyLoader(() => fetchText(`/contents/elevator/donation.html`)));
+CONTENTS.set(1001, new LazyLoader(() => fetchText(`/contents/elevator/suggestion.html`)));

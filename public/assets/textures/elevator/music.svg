@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
    class="bg"
-   viewBox="-100 0 256 192"
+   viewBox="-100 0 272 128"
    version="1.1"
    id="svg5"
-   width="256"
-   height="192"
+   width="272"
+   height="128"
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
@@ -34,7 +34,7 @@
   <g
      id="layer1"
      style="display:inline"
-     transform="translate(-299.8418,283.34399)">
+     transform="translate(115.2941,190.55654)">
     <path
        id="path1"
        style="fill:#636363;fill-opacity:1;stroke-width:1.58544"
@@ -164,7 +164,7 @@
            style="fill:#cacaca;fill-opacity:1;stroke-width:1.11627" />
       </g>
       <circle
-         style="display:inline;fill:#103525;fill-opacity:1;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke"
+         style="display:none;fill:#103525;fill-opacity:1;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke"
          id="speaker-light"
          cx="99"
          cy="125.15"
@@ -209,32 +209,32 @@
          style="fill:#15293c;fill-opacity:1;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke"
          d="m 47,146.14999 h 68 v 48 H 47 Z" />
       <rect
-         style="fill:#1c3750;fill-opacity:1;stroke-width:60;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke"
+         style="fill:#1c3750;fill-opacity:1;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke"
          id="rect11"
-         width="256"
-         height="192"
-         x="199.8418"
-         y="-283.34399"
+         width="64"
+         height="48"
+         x="47"
+         y="146.14999"
          ry="0" />
       <rect
-         style="fill:#11202f;fill-opacity:1;stroke-width:60;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke"
+         style="fill:#11202f;fill-opacity:1;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke"
          id="rect12"
-         width="224"
-         height="160"
-         x="215.8418"
-         y="-267.34399"
+         width="56"
+         height="40"
+         x="51"
+         y="150.14999"
          ry="0" />
       <path
-         d="m 289.64774,-207.87708 -0.174,-0.5246 c -2.21016,-6.66396 -9.40396,-10.27444 -16.06804,-8.06428 l -18.5112,6.1394 c -6.95368,2.30624 -10.72116,9.81288 -8.41492,16.76652 2.30624,6.95368 9.81284,10.72116 16.76652,8.41492 l 17.98672,-5.96544 c 6.95368,-2.30624 14.46028,1.4612 16.76652,8.41492 2.30624,6.95364 -1.46124,14.46028 -8.41492,16.76652 l -18.24904,6.0524 c -6.80876,2.2582 -14.15908,-1.43096 -16.41724,-8.23968 l -0.0872,-0.2624 m 6.67048,-52.12536 21.47556,64.7522"
+         d="m 69.451476,165.01672 -0.0435,-0.13115 c -0.552539,-1.66599 -2.350988,-2.56861 -4.01701,-2.01607 l -4.627806,1.53485 c -1.738418,0.57656 -2.680285,2.45322 -2.103727,4.19163 0.576561,1.73842 2.453211,2.68029 4.191629,2.10373 l 4.496682,-1.49136 c 1.738418,-0.57656 3.615068,0.3653 4.191629,2.10373 0.576558,1.73841 -0.365309,3.61507 -2.103727,4.19163 l -4.562262,1.5131 c -1.702192,0.56455 -3.539767,-0.35774 -4.104306,-2.05992 l -0.02175,-0.0656 m 1.667621,-13.03134 5.36889,16.18805"
          stroke="#000000"
-         stroke-width="7.58012"
+         stroke-width="1.89503"
          stroke-linecap="round"
          stroke-linejoin="round"
          id="path1-3"
          style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
       <g
          id="g7661"
-         transform="matrix(1.2280554,0.08619784,-0.08913976,1.2699688,44.484892,-323.3332)"
+         transform="matrix(0.30701385,0.02154946,-0.02228494,0.31749219,8.1607714,136.15269)"
          style="display:inline;stroke-width:1.22808">
         <g
            id="g7086"

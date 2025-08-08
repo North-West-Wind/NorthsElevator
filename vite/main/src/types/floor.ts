@@ -14,6 +14,7 @@ export default abstract class Floor {
 	listenUpdate = false;
 	special = false;
 	protected meshes: Generated;
+	functionFloor = false;
 
 	constructor(id: string, num: number, loaders?: { content?: LazyLoader<string> }) {
 		this.id = id;
