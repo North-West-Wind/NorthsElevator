@@ -5,15 +5,3 @@ tmp
 .well-known
 dist
 out
-public/js/index-*.js
-public/main.html
-public/404.html
-public/main2d.html
-
-vite/**/public
-
-# generated at runtime
-public/assets/images/colors
-
-# uop-editor submodule stuff
-public/uop-editor*

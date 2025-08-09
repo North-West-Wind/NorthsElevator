@@ -31,6 +31,7 @@ app.use(compression());
 app.use("/", sirv("./public", { extensions: [] }));
 app.use("/", sirv("./vite/main2d/dist", { extensions: [] }));
 app.use("/", sirv("./vite/main/dist", { extensions: [] }));
+app.use("/", sirv("./uop-editor/dist", { extensions: [] }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.set('views', path.resolve(__dirname, "../views"));
 app.set('view engine', 'ejs');
@@ -82,7 +83,7 @@ app.get("/portal", (_req, res) => res.render("portal"));
 
 // uop editor
 app.get("/uop-editor", (req, res) => {
-	res.sendFile("uop-editor.html", { root });
+	res.sendFile("index.html", { root: path.resolve(__dirname, "../uop-editor/dist") });
 });
 
 // elevator
