@@ -1,8 +1,10 @@
 import * as THREE from "three";
 import Floor from "../types/floor";
-import { camera } from "../states";
-import { GLTF_LOADED } from "../loaders";
+import { GLTF_LOADED } from "../3d/loaders";
 import { infoPageHandler } from "./ground";
+import { randomBetween } from "../helpers/math";
+
+const SVG_NS = "http://www.w3.org/2000/svg";
 
 type FireEntry = {
 	mesh: THREE.Mesh;
@@ -15,9 +17,47 @@ const FIRE_COLOR = [
 	0xff5917
 ];
 
+class FireParticle {
+	svg: SVGGElement;
+	node: SVGEllipseElement;
+	x: number;
+	rot: number;
+	finished = false;
+
+	constructor(svg: SVGGElement) {
+		this.svg = svg;
+		this.node = document.createElementNS(SVG_NS, "ellipse");
+		this.node.setAttribute("cx", "970");
+		this.node.setAttribute("cy", "670");
+		const radius = "" + randomBetween(10, 20);
+		this.node.setAttribute("rx", radius);
+		this.node.setAttribute("ry", radius);
+		this.node.setAttribute("fill", FIRE_COLOR[Math.floor(Math.random() * FIRE_COLOR.length)].toString(16)); // no need padstart
+		this.node.classList.add("fire");
+		this.x = Math.round(Math.random() * 100);
+		this.rot = Math.floor(Math.random() * 360);
+	}
+
+	start() {
+		this.svg.append(this.node);
+		const angle = randomBetween(0.1, Math.PI - 0.1, false);
+		setTimeout(() => {
+			this.node.style.transform = `translate(${15 * Math.cos(angle)}vw, ${-15 * Math.sin(angle)}vh)`;
+			this.node.style.opacity = "0";
+			setTimeout(() => {
+				this.node.remove();
+				this.finished = true;
+			}, 2000);
+		}, 100);
+	}
+}
+
 export default class NotFoundFloor extends Floor {
 	allFires: FireEntry[] = [];
 	campfirePos: THREE.Vector3;
+	// 2D
+	fires: FireParticle[] = [];
+	spawnTimer?: NodeJS.Timer;
 
 	constructor() {
 		super("not-found", 404); // 404 is completely for aesthetics lol
@@ -58,7 +98,7 @@ export default class NotFoundFloor extends Floor {
 	}
 
 	handleWheel(scroll: number) {
-		const cam = camera();
+		const cam = this.main3d().camera;
 		if (cam.position.y != 1000 * this.num) cam.position.y = 1000 * this.num;
 		const absoluted = Math.abs(scroll);
 		if (cam.position.x != 0) {
@@ -106,6 +146,16 @@ export default class NotFoundFloor extends Floor {
 	}
 
 	loadContent() {
-		infoPageHandler();
+		if (this.main3d()) infoPageHandler();
+	}
+
+	loadSvg(background: HTMLDivElement) {
+		const svg = background.querySelector<SVGGElement>("svg g#fires")!;
+		this.spawnTimer = setInterval(() => {
+			this.fires = this.fires.filter(r => !r.finished);
+			const drop = new FireParticle(svg);
+			drop.start();
+			this.fires.push(drop);
+		}, 250);
 	}
 }

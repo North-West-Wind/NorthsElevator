@@ -11,9 +11,7 @@
         "install:main": "cd vite/main && npm i",
         "build:main": "cd vite/main && npm run build",
         "install:uop-editor": "cd uop-editor && npm i",
-        "build:uop-editor": "cd uop-editor && npm run build",
-        "install:main2d": "cd vite/main2d && npm i",
-        "build:main2d": "cd vite/main2d && npm run build"
+        "build:uop-editor": "cd uop-editor && npm run build"
     },
     "author": "NorthWestWind",
     "license": "GPL-3.0-or-later",

@@ -29,7 +29,6 @@ const app = express();
 
 app.use(compression());
 app.use("/", sirv("./public", { extensions: [] }));
-app.use("/", sirv("./vite/main2d/dist", { extensions: [] }));
 app.use("/", sirv("./vite/main/dist", { extensions: [] }));
 app.use("/", sirv("./uop-editor/dist", { extensions: [] }));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -103,8 +102,7 @@ app.get("/:page?", (req, res) => {
 		const content = fs.readFileSync(path.join(root, "contents", filename), { encoding: "utf8" });
 		template = template.replace("{content}", content);
 		res.send(template);
-	} else if (req.query.flat !== undefined) res.sendFile("main2d.html", { root: path.resolve(__dirname, "../vite/main2d/dist") });
-	else res.sendFile("main.html", { root: path.resolve(__dirname, "../vite/main/dist") });
+	} else res.sendFile("index.html", { root: path.resolve(__dirname, "../vite/main/dist") });
 });
 
 const server = app.listen(process.env.PORT || 3000, async () => {

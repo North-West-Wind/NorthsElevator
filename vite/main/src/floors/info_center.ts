@@ -1,16 +1,12 @@
 import * as THREE from "three";
 import Floor, { Generated } from "../types/floor";
-import { camera } from "../states";
-import { toggleContent } from "../helpers/html";
 import { fetchText } from "../helpers/reader";
 import { LazyLoader } from "../types/misc";
-import { CONTENTS } from "../constants";
 import { wait } from "../helpers/control";
-import { SVG_LOADER } from "../loaders";
+import { SVG_LOADER } from "../3d/loaders";
 import { clamp, createSVGCenteredGroup, createSVGGroupWithCenter, randomBetween } from "../helpers/math";
 import { SVGResult } from "three/addons/loaders/SVGLoader.js";
 
-const info = document.getElementById("info") as HTMLDivElement;
 const PAGES = new Map<string, LazyLoader<string>>();
 fetch(`/api/config`).then(async res => {
 	if (!res.ok) return;
@@ -44,6 +40,7 @@ export default class InfoCenterFloor extends Floor {
 
 	constructor() {
 		super("info-center", 1);
+		this.disableContent = true;
 		this.listenClick = true;
 		this.listenMove = true;
 		this.listenUpdate = true;
@@ -211,7 +208,7 @@ export default class InfoCenterFloor extends Floor {
 	}
 
 	handleWheel(scroll: number) {
-		const cam = camera();
+			const cam = this.main3d().camera;
 		if (cam.position.y != this.num * 1000) cam.position.y = this.num * 1000;
 		const maxDist = 65;
 		let maxed = false;
@@ -232,20 +229,82 @@ export default class InfoCenterFloor extends Floor {
 	}
 
 	async blinker() {
-		while (this.dinged) {
-			await wait(randomBetween(8000, 12000));
-			if (!this.dinged) return;
-			this.meshes!.integrelle.visible = false;
-			this.meshes!.integrelleClose.visible = true;
-			await wait(200);
-			this.meshes!.integrelleClose.visible = false;
-			this.meshes!.integrelle.visible = true;
+		if (this.main3d()) {
+			while (this.dinged) {
+				await wait(randomBetween(8000, 12000));
+				if (!this.dinged) return;
+				this.meshes!.integrelle.visible = false;
+				this.meshes!.integrelleClose.visible = true;
+				await wait(200);
+				this.meshes!.integrelleClose.visible = false;
+				this.meshes!.integrelle.visible = true;
+			}
+		} else {
+			while (this.dinged) {
+				await wait(randomBetween(10000, 20000));
+				document.querySelector<SVGGElement>("#eye-open")?.classList.add("hidden");
+				document.querySelector<SVGGElement>("#eye-close")?.classList.remove("hidden");
+				await wait(200);
+				document.querySelector<SVGGElement>("#eye-close")?.classList.add("hidden");
+				document.querySelector<SVGGElement>("#eye-open")?.classList.remove("hidden");
+			}
 		}
 	}
 
-	private async loadConversation(next: string) {
-		if (info.classList.contains("hidden")) toggleContent({ html: await (PAGES.has(next) ? PAGES.get(next) : CONTENTS.get(this.num))!.get() });
-		else info.innerHTML = await (PAGES.has(next) ? PAGES.get(next) : CONTENTS.get(this.num))!.get();
+	loadSvg() {
+		const integrelle = document.querySelector<SVGGElement>("#integrelle")!;
+		const eyeClose = document.querySelector<SVGGElement>("#eye-close")!;
+		const arms = document.querySelector<SVGGElement>("#arms")!;
+		const hands = document.querySelector<SVGGElement>("#hands")!;
+		const bell = document.querySelector<SVGGElement>("#bell")!;
+
+		integrelle.classList.add("hidden");
+		eyeClose.classList.add("hidden");
+		arms.classList.add("hidden");
+		hands.classList.add("hidden");
+		bell.classList.add("link-like");
+
+		integrelle.style.transform = "translateY(50vh)";
+		arms.style.transform = "translateY(50vh)";
+
+		bell.onclick = async () => {
+			const audio = new Audio('/assets/sounds/ding.mp3');
+			audio.play();
+			if (this.dinged) return;
+			this.dinged = true;
+			await wait(500);
+			arms.classList.remove("hidden");
+			await wait(10);
+			arms.style.transform = "";
+			await wait(1000);
+			arms.classList.add("hidden");
+			hands.classList.remove("hidden");
+			await wait(500);
+			integrelle.classList.remove("hidden");
+			await wait(10);
+			integrelle.style.transform = "";
+
+			this.blinker();
+			await wait(1500);
+			this.main2d().toggleContent(this);
+			this.disableContent = false;
+		}
+	}
+
+	unloadSvg() {
+		this.dinged = false;
+		this.disableContent = true;
+	}
+
+	private async loadConversation(info: HTMLDivElement, next: string) {
+		if (this.main2d()) {
+			const page = PAGES.get(next);
+			if (page) info.innerHTML = await page.get();
+			else info.innerHTML = await this.content.get();
+		} else {
+			if (info.classList.contains("hidden")) this.main3d().toggleContent(this, await (PAGES.has(next) ? PAGES.get(next)!.get() : this.main3d().contentByNum(this.num)));
+			else info.innerHTML = await (PAGES.has(next) ? PAGES.get(next)!.get() : this.main3d().contentByNum(this.num));
+		}
 		this.loadContent(info);
 	}
 
@@ -271,7 +330,7 @@ export default class InfoCenterFloor extends Floor {
 			await wait(500);
 		}
 
-		if (this.animationState == AnimationState.IDLE) this.loadConversation("");
+		if (this.animationState == AnimationState.IDLE) this.loadConversation(document.getElementById("info") as HTMLDivElement, "");
 	}
 
 	clickRaycast(raycaster: THREE.Raycaster) {
@@ -317,7 +376,7 @@ export default class InfoCenterFloor extends Floor {
 	loadContent(info: HTMLDivElement) {
 		for (const li of info.querySelectorAll<HTMLLIElement>("li")) {
 			if (li.hasAttribute("next"))
-				li.onclick = () => this.loadConversation(li.getAttribute("next")!);
+				li.onclick = () => this.loadConversation(info, li.getAttribute("next")!);
 		}
 	}
 }

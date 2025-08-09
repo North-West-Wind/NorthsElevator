@@ -1,8 +1,6 @@
 import * as THREE from "three";
 import Floor from "../types/floor";
-import { TEXTURE_LOADER } from "../loaders";
-import { camera, rotatedX, touched } from "../states";
-import { toggleContent } from "../helpers/html";
+import { TEXTURE_LOADER } from "../3d/loaders";
 import { configTexture } from "../helpers/macro";
 
 const div = document.getElementById("info")!;
@@ -116,7 +114,7 @@ export default class SkyFarmFloor extends Floor {
 	}
 
 	handleWheel(scroll: number) {
-		const cam = camera();
+		const cam = this.main3d().camera;
 		const rotateAngle = -1;
 		const maxDist0 = 100;
 		const maxDist1 = 162;
@@ -128,14 +126,14 @@ export default class SkyFarmFloor extends Floor {
 				cam.translateZ(-scroll);
 				if (cam.position.z < -maxDist1) {
 					cam.position.z = -maxDist1;
-					if (touched()) zoomLimitReached = true;
+					if (this.main3d().touched) zoomLimitReached = true;
 					maxed = true;
 				}
 				cam.position.x = -(Math.abs(cam.position.z) - maxDist0) * maxDist2 / (maxDist1 - maxDist0);
 				cam.position.y = -(Math.abs(cam.position.z) - maxDist0) * maxDist3 / (maxDist1 - maxDist0) + this.num * 1000;
-				rotatedX(rotateAngle * (Math.abs(cam.position.z) - maxDist0) / (maxDist1 - maxDist0));
-			} else if (scroll > 0 && !touched()) {
-				if (div.classList.contains('hidden')) toggleContent({ page: this.id });
+				this.main3d().rotatedX = rotateAngle * (Math.abs(cam.position.z) - maxDist0) / (maxDist1 - maxDist0);
+			} else if (scroll > 0 && !this.main3d().touched) {
+				if (div.classList.contains('hidden')) this.main3d().toggleContent(this, () => this.main3d().contentById(this.id));
 			}
 		} else {
 			cam.translateZ(-scroll);
@@ -145,10 +143,10 @@ export default class SkyFarmFloor extends Floor {
 			}
 			if (cam.position.x != 0) cam.position.x = 0;
 			if (cam.position.y != this.num * 1000) cam.position.y = this.num * 1000;
-			rotatedX(0);
+			this.main3d().rotatedX = 0;
 		}
 
-		if (zoomLimitReached) toggleContent({ page: this.id });
+		if (zoomLimitReached) this.main3d().toggleContent(this, () => this.main3d().contentById(this.id));
 		return maxed;
 	}
 }

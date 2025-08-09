@@ -1,7 +1,7 @@
 import { Group, TextureLoader } from "three";
 import { GLTF, GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
-import { LazyLoader } from "./types/misc";
+import { LazyLoader } from "../types/misc";
 
 const MODELS = [
 	"armor_stand",

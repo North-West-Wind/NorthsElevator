@@ -1,19 +1,23 @@
 import * as THREE from "three";
 import Floor, { Generated } from "../types/floor";
-import { GLTF_LOADED } from "../loaders";
-import { camera, rotatedY, started } from "../states";
-import { toggleContent } from "../helpers/html";
+import { GLTF_LOADED } from "../3d/loaders";
 import { fetchText } from "../helpers/reader";
 import { LazyLoader } from "../types/misc";
 
 const SHEETS = 12;
 
 export const SHEETMUSIC_CONTENTS: LazyLoader<string>[] = [];
+const SHEETMUSIC_TITLES: string[] = [];
 
-for (let i = 0; i < SHEETS; i++) {
-	const loader = new LazyLoader(() => fetchText(`/contents/sheetmusic/info-${i}.html`));
-	SHEETMUSIC_CONTENTS.push(loader);
-}
+(async () => {
+	for (let i = 0; i < SHEETS; i++) {
+		const loader = new LazyLoader(() => fetchText(`/contents/sheetmusic/info-${i}.html`));
+		SHEETMUSIC_CONTENTS.push(loader);
+		// be not lazy
+		const content = await loader.get();
+		SHEETMUSIC_TITLES.push(content.match(/\<h1\>(?<name>.+)\<\/h1\>/)![1]);
+	}
+})();
 
 export default class SheetMusicFloor extends Floor {
 	sheets?: THREE.Mesh[];
@@ -82,7 +86,7 @@ export default class SheetMusicFloor extends Floor {
 	}
 
 	handleWheel(scroll: number) {
-		const cam = camera();
+		const cam = this.main3d().camera;
 		const rotateAngle = -1.2;
 		const maxDist = 175;
 		let maxed = false;
@@ -98,19 +102,15 @@ export default class SheetMusicFloor extends Floor {
 		}
 		if (cam.position.x != 0) cam.position.x = 0;
 		cam.position.y = this.num * 1000 + cam.position.z / 10;
-		rotatedY(rotateAngle * Math.abs(cam.position.z) / maxDist);
+		this.main3d().rotatedY = rotateAngle * Math.abs(cam.position.z) / maxDist;
 		return maxed;
 	}
 
-	private async openOrCloseSheetInfo(index: number) {
-		toggleContent({ html: await SHEETMUSIC_CONTENTS[index].get() });
-	}
-
 	clickRaycast(raycaster: THREE.Raycaster): void {
-		if (this.sheets && started()) {
+		if (this.sheets && this.main3d().started) {
 			for (let i = 0; i < this.sheets.length; i++)
 				if (raycaster.intersectObject(this.sheets[i]).length > 0) {
-					this.openOrCloseSheetInfo(i);
+					this.main3d().toggleContent(this, () => SHEETMUSIC_CONTENTS[i].get());
 					break;
 				}
 		}
@@ -118,5 +118,29 @@ export default class SheetMusicFloor extends Floor {
 
 	moveCheck() {
 		return this.sheets || super.moveCheck();
+	}
+
+	async loadSheetContent(info: HTMLDivElement, index: number) {
+		info.innerHTML = await SHEETMUSIC_CONTENTS[index].get();
+
+		const h1 = info.querySelector<HTMLHeadingElement>("h1")!;
+		h1.classList.add("sheet-back");
+		h1.innerHTML = "<- " + h1.innerText;
+		h1.onclick = () => this.loadContent(info);
+	}
+
+	async loadContent(info: HTMLDivElement) {
+		if (this.main3d()) return;
+		info.innerHTML = await this.content.get();
+
+		const ul = info.querySelector<HTMLUListElement>("ul")!;
+		for (let ii = 0; ii < SHEETMUSIC_TITLES.length; ii++) {
+			const title = SHEETMUSIC_TITLES[ii];
+			const li = document.createElement("li");
+			li.innerHTML = title;
+			li.onclick = () => this.loadSheetContent(info, ii);
+
+			ul.appendChild(li);
+		}
 	}
 }

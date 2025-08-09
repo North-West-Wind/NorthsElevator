@@ -1,8 +1,6 @@
 import * as THREE from "three";
 import Floor from "../types/floor";
-import { GLTF_LOADED, TEXTURE_LOADER } from "../loaders";
-import { camera } from "../states";
-import { toggleContent } from "../helpers/html";
+import { GLTF_LOADED, TEXTURE_LOADER } from "../3d/loaders";
 import { LazyLoader } from "../types/misc";
 import { fetchText } from "../helpers/reader";
 import { configTexture } from "../helpers/macro";
@@ -21,6 +19,7 @@ export default class ModsFloor extends Floor {
 
 	constructor() {
 		super("mods", 2);
+		this.disableContent = true;
 		this.listenClick = true;
 		this.listenMove = true;
 	}
@@ -133,7 +132,7 @@ export default class ModsFloor extends Floor {
 	}
 
 	handleWheel(scroll: number) {
-		const cam = camera();
+		const cam = this.main3d().camera;
 		if (cam.position.y != this.num * 1000) cam.position.y = this.num * 1000;
 		const maxDist = 70;
 		var maxed = false;
@@ -154,7 +153,7 @@ export default class ModsFloor extends Floor {
 	}
 
 	private async toggleModInfo(page: ModPage) {
-		toggleContent({ html: await MOD_CONTENTS.get(page)!.get() });
+		this.elevator().toggleContent(this, await MOD_CONTENTS.get(page)!.get());
 	}
 
 	clickRaycast(raycaster: THREE.Raycaster) {
@@ -167,5 +166,16 @@ export default class ModsFloor extends Floor {
 	moveCheck() {
 		if (this.meshes) return [this.meshes.fishingRod, this.meshes.string, this.meshes.holder, this.meshes.armorStand, this.meshes.bootL, this.meshes.bootR];
 		else return super.moveCheck();
+	}
+
+	loadSvg() {
+		const rod = document.querySelector<SVGGElement>("#rod")!;
+		const boots = document.querySelector<SVGGElement>("#boots")!;
+
+		rod.classList.add("link-like");
+		boots.classList.add("link-like");
+
+		rod.onclick = () => this.toggleModInfo(ModPage.AUTO_FISH);
+		boots.onclick = () => this.toggleModInfo(ModPage.MORE_BOOTS);
 	}
 }

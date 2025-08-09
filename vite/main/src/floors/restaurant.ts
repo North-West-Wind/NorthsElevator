@@ -1,7 +1,5 @@
 import * as THREE from "three";
 import Floor from "../types/floor";
-import { camera } from "../states";
-import { toggleContent } from "../helpers/html";
 import { fetchJson, fetchText } from "../helpers/reader";
 import { LazyLoader } from "../types/misc";
 import { getConfig, setMusic, wait, writeConfig } from "../helpers/control";
@@ -82,12 +80,14 @@ export default class RestaurantFloor extends Floor {
 	// summatia state
 	emotion = 17;
 	resets = 0;
+	active = false;
 	// music stuff
 	musicPlaying = false;
 	audio!: HTMLAudioElement;
 
 	constructor() {
 		super("restaurant", 4);
+		this.disableContent = true;
 		this.listenUpdate = true;
 		this.phase = Phase.INITIAL;
 		this.candleLightPos = new THREE.Vector3(0, this.num * 1000 - 4, -100);
@@ -265,13 +265,13 @@ export default class RestaurantFloor extends Floor {
 			cover2.position.set(0, this.num * 1000, -77);
 			this.covers = [cover1, cover2];
 			scene.add(cover1, cover2);
-		}
+		} else scene.add(this.chair);
 
-		return { table, summatia, handsHold, handsTable };
+		return { table, summatia, handsHold, handsTable, chair: this.chair };
 	}
 
 	handleWheel(scroll: number) {
-		const cam = camera();
+		const cam = this.main3d().camera;
 		if (cam.position.y != this.num * 1000) cam.position.y = this.num * 1000;
 		if (this.phase == Phase.TRANSITION) return true;
 		let maxed = false;
@@ -288,7 +288,7 @@ export default class RestaurantFloor extends Floor {
 
 				setTimeout(() => {
 					this.phase = Phase.DATING;
-					setTimeout(() => toggleContent(), 1000);
+					setTimeout(() => this.main3d().toggleContent(this), 1000);
 				}, 3000);
 			} else if (cam.position.z > 0) {
 				cam.position.z = 0;
@@ -306,7 +306,7 @@ export default class RestaurantFloor extends Floor {
 
 				setTimeout(() => {
 					this.phase = Phase.DATING;
-					toggleContent();
+					this.main3d().toggleContent(this);
 				}, 1000);
 			} else if (cam.position.z > 0) {
 				cam.position.z = 0;
@@ -373,13 +373,16 @@ export default class RestaurantFloor extends Floor {
 				}
 				img.src = 'data:image/svg+xml;base64,' + btoa(div.innerHTML);
 			});
-			this.meshes!.handsTable.visible = !!(this.emotion & (FaceComponent.HANDS_TABLE));
-			this.meshes!.handsHold.visible = !!(this.emotion & (FaceComponent.HANDS_HEAD));
+
+			if (this.meshes.handsTable && this.meshes.handsHold) {
+				this.meshes!.handsTable.visible = !!(this.emotion & (FaceComponent.HANDS_TABLE));
+				this.meshes!.handsHold.visible = !!(this.emotion & (FaceComponent.HANDS_HEAD));
+			} else this.updateCanvas = true;
 		}
 	}
 	
-	private enableByEmotion(div: HTMLDivElement) {
-		const svg = div.querySelector<SVGElement>("svg")!;
+	private enableByEmotion(div?: HTMLDivElement) {
+		const svg = this.main2d() ? document.querySelector<SVGElement>("#background svg")! : div!.querySelector<SVGElement>("svg")!;
 
 		svg.querySelector<SVGGElement>("#eye")!.style.display = this.emotion & (FaceComponent.EYES_NORMAL_OPEN | FaceComponent.EYES_NORMAL_CLOSE) ? "inline" : "none";
 		svg.querySelector<SVGGElement>("#eye-half")!.style.display = this.emotion & (FaceComponent.EYES_HALF_OPEN | FaceComponent.EYES_HALF_CLOSE) ? "inline" : "none";
@@ -393,22 +396,20 @@ export default class RestaurantFloor extends Floor {
 
 		svg.querySelector<SVGGElement>("#blush")!.style.opacity = this.emotion & FaceComponent.FACE_BLUSH ? "1" : "0";
 
-		svg.querySelector<SVGGElement>("#brows-angry")!.style.display = this.emotion & FaceComponent.BROWS_ANGRY ? "inline" : "none";
-		svg.querySelector<SVGGElement>("#brows-worried")!.style.display = this.emotion & FaceComponent.BROWS_WORRIED ? "inline" : "none";
-		svg.querySelector<SVGGElement>("#brows")!.style.display = !(this.emotion & (FaceComponent.BROWS_ANGRY | FaceComponent.BROWS_WORRIED)) ? "inline" : "none";
+		if (this.main2d()) {
+			if (this.emotion & (FaceComponent.BROWS_ANGRY | FaceComponent.BROWS_WORRIED)) {
+				svg.querySelector<SVGPathElement>(".left-brow")!.style.transform = `rotate(${this.emotion & FaceComponent.BROWS_ANGRY ? "-10" : "20"}deg)`;
+				svg.querySelector<SVGPathElement>(".right-brow")!.style.transform = `rotate(${this.emotion & FaceComponent.BROWS_ANGRY ? "10" : "-20"}deg)`;
+			} else
+				svg.querySelectorAll<SVGPathElement>(".brow").forEach(item => item.style.transform = "");
 
-		/*if (this.emotion & (FaceComponent.BROWS_ANGRY | FaceComponent.BROWS_WORRIED)) {
-			draw.find(".left-brow").forEach(item => item.css({ transform: `rotate(${this.emotion & FaceComponent.BROWS_ANGRY ? "-10" : "20"}deg)` }));
-			draw.find(".right-brow").forEach(item => item.css({ transform: `rotate(${this.emotion & FaceComponent.BROWS_ANGRY ? "10" : "-20"}deg)` }));
-		} else
-			draw.find(".brow").forEach(item => item.css({ transform: "" }));*/
-
-		/*
-		if (this.emotion & (1024)) console.log("worried");
-		draw.find("#brows-angry").forEach(item => item.css({ display: this.emotion & (512) ? "inline" : "none" }));
-		draw.find("#brows-worried").forEach(item => item.css({ display: this.emotion & (1024) ? "inline" : "none" }));
-		draw.find("#brows").forEach(item => item.css({ display: !(this.emotion & (512 + 1024)) ? "inline" : "none" }));
-		*/
+			svg.querySelector<SVGGElement>("#hands-table")!.style.display = this.emotion & FaceComponent.HANDS_TABLE ? "inline" : "none";
+			svg.querySelector<SVGGElement>("#hands-hold")!.style.display = this.emotion & FaceComponent.HANDS_HEAD ? "inline" : "none";
+		} else {
+			svg.querySelector<SVGGElement>("#brows-angry")!.style.display = this.emotion & FaceComponent.BROWS_ANGRY ? "inline" : "none";
+			svg.querySelector<SVGGElement>("#brows-worried")!.style.display = this.emotion & FaceComponent.BROWS_WORRIED ? "inline" : "none";
+			svg.querySelector<SVGGElement>("#brows")!.style.display = !(this.emotion & (FaceComponent.BROWS_ANGRY | FaceComponent.BROWS_WORRIED)) ? "inline" : "none";
+		}
 
 		svg.querySelectorAll<SVGElement>(".summatia-head").forEach(item => item.style.transform = `translateY(${this.emotion & FaceComponent.HEAD_LOWERED ? "5" : "0"}px)`);
 
@@ -447,6 +448,10 @@ export default class RestaurantFloor extends Floor {
 
 		this.next(getConfig().summatia ? "back" : "first");
 		this.audio.play();
+		if (this.main2d()) {
+			setMusic(false, false);
+			this.phase = Phase.DATING;
+		}
 	}
 
 	unloadContent(info: HTMLDivElement) {
@@ -468,7 +473,8 @@ export default class RestaurantFloor extends Floor {
 		}
 
 		this.emotion = typeof data.emotion == "string" ? summatiaData.emotions[data.emotion] : data.emotion;
-		this.updateCanvas = true;
+		if (this.main2d()) this.enableByEmotion();
+		else this.updateCanvas = true;
 
 		const ans = document.querySelector<HTMLDivElement>("#summatia-ans")!;
 		ans.style.opacity = "0";
@@ -509,6 +515,23 @@ export default class RestaurantFloor extends Floor {
 			ans.style.opacity = "1";
 		} else if (data.next) this.next(data.next);
 		else this.next(this.validKeyOrElse(getConfig().summatia, "first"));
+	}
+
+	loadSvg(bg: HTMLDivElement) {
+		const cover = bg.querySelector<SVGRectElement>("svg rect#cover")!;
+		cover.style.display = "inline";
+
+		this.enableByEmotion();
+	}
+
+	async skipContent() {
+		this.musicPlaying = getConfig().music;
+		setMusic(false, true);
+		await wait(3000);
+		const cover = document.querySelector<SVGRectElement>("#background svg rect#cover")!;
+		cover.style.display = "none";
+		await wait(1000);
+		this.main2d().toggleContent(this);
 	}
 
 	private validKeyOrElse(key: string, fallback: string) {

@@ -5,6 +5,7 @@ const DEFAULT_CONFIG = {
 	summatia: "",
 	autoSummatia: false,
 	smoothScroll: true,
+	flat: false
 };
 const CONFIG_COOKIE_NAME = "elevator_config";
 

@@ -1,8 +1,7 @@
 import * as THREE from "three";
-import { FLOORS } from "./constants";
 import { TEXTURE_LOADER } from "./loaders";
-import { isMusic, isSmoothScroll } from "./helpers/control";
-import { configTexture } from "./helpers/macro";
+import { isMusic, isSmoothScroll } from "../helpers/control";
+import { configTexture } from "../helpers/macro";
 
 type LiftObjects = { [key: string]: THREE.Mesh };
 
@@ -273,7 +272,7 @@ export function displayTexture(floor: string | number | null) {
 	xc.font = "256px 'Courier New'";
 	xc.textAlign = "center";
 	xc.textBaseline = "middle";
-	if (floor !== 0 && !floor || typeof floor === "number" && floor >= FLOORS.size) xc.fillText("?", x.width / 2, x.height / 2);
+	if (floor !== 0 && !floor) xc.fillText("?", x.width / 2, x.height / 2);
 	else if (typeof floor == "string") xc.fillText(floor, x.width / 2, x.height / 2);
 	else xc.fillText(floor <= 0 ? "G" : floor.toString(), x.width / 2, x.height / 2);
 	const texture = new THREE.Texture(x);

@@ -1,12 +1,17 @@
 import * as THREE from "three";
 import Floor from "../types/floor";
-import { camera } from "../states";
-import { TEXTURE_LOADER } from "../loaders";
+import { TEXTURE_LOADER } from "../3d/loaders";
 import { fetchText } from "../helpers/reader";
-import { toggleContent } from "../helpers/html";
 import { LazyLoader } from "../types/misc";
 
 const TEMPLATE = new LazyLoader(() => fetchText("/contents/gallery/template.html"));
+let FILES: string[] = [];
+
+fetch(`/api/config`).then(async res => {
+	if (!res.ok) return;
+	const files = <string[]>(await res.json()).pfps;
+	FILES = files.sort();
+});
 
 const PAINTING_LENGTH = 50;
 const LENGTH_PER_PAINTING = PAINTING_LENGTH + 30;
@@ -119,7 +124,7 @@ export default class GalleryFloor extends Floor {
 
 	handleWheel(scroll: number) {
 		let maxed = false;
-		const cam = camera();
+		const cam = this.main3d().camera;
 		const maxDist = GalleryFloor.floorLength + 10;
 		if (cam.position.z >= -maxDist) cam.translateZ(-scroll);
 		if (cam.position.z < -maxDist) {
@@ -136,11 +141,11 @@ export default class GalleryFloor extends Floor {
 	}
 
 	private openOrCloseGalleryInfo(index: number) {
-		toggleContent({ html: async () => {
+		this.main3d().toggleContent(this, async () => {
 			const file = (await GalleryFloor.fileNames)[index];
 			if (!file) return "";
 			return (await TEMPLATE.get()).replace("{title}", file.split(" ").slice(1).join(" ").split(".").slice(0, -1).join(".")).replace("{src}", `assets/pfps/${file}`);
-		}})
+		});
 	}
 
 	clickRaycast(raycaster: THREE.Raycaster) {
@@ -153,5 +158,41 @@ export default class GalleryFloor extends Floor {
 
 	moveCheck() {
 		return this.paintings;
+	}
+
+	async loadPicture(info: HTMLDivElement, index: number) {
+		const file = FILES[index];
+		info.innerHTML = (await TEMPLATE.get()).replace("{title}", file.split(" ").slice(1).join(" ").split(".").slice(0, -1).join(".")).replace("{src}", `/assets/pfps/${file}`);
+
+		const h1 = info.querySelector<HTMLHeadingElement>("h1")!;
+		h1.classList.add("sheet-back");
+		h1.innerHTML = "<- " + h1.innerText;
+		h1.onclick = () => this.loadContent(info);
+	}
+
+	async loadContent(info: HTMLDivElement) {
+		if (this.main3d()) return;
+		info.innerHTML = await this.content.get();
+
+		let columnDiv: HTMLDivElement;
+		for (let ii = 0; ii < FILES.length; ii++) {
+			const file = FILES[ii];
+			if (ii % 2 == 0) {
+				columnDiv = document.createElement("div");
+				columnDiv.classList.add("flex", "vcenter");
+				info.appendChild(columnDiv);
+			}
+			const innerDiv = document.createElement("div");
+			const h2 = document.createElement("h2");
+			h2.innerHTML = file.split(" ").slice(1).join(" ").split(".").slice(0, -1).join(".");
+			const img = document.createElement("img");
+			img.src = `/assets/pfps/${file}`;
+			innerDiv.appendChild(h2);
+			innerDiv.appendChild(img);
+			columnDiv!.appendChild(innerDiv);
+
+			innerDiv.classList.add("link-like", "gallery-entry");
+			innerDiv.onclick = () => this.loadPicture(info, ii);
+		}
 	}
 }
