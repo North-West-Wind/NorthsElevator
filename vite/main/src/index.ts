@@ -11,9 +11,9 @@ import { FirstPersonControls } from "three/addons/controls/FirstPersonControls.j
 
 if (!WebGL.isWebGL2Available()) {
   alert("WebGL is not supported! You have lost your privilege to the R³ space.");
-  const split = window.location.href.split("/");
-  split.splice(3, 0, "2d");
-  window.location.href = split.join("/");
+	const search = new URLSearchParams(window.location.search);
+	search.set("flat", "");
+  window.location.href = window.location.href.split("?")[0] + search;
 }
 
 const passedInFloor = ((Array.from(FLOORS.keys()).indexOf(window.location.pathname.split("/")[1] || "ground") + 1) || (404 + 1)) - 1;
@@ -50,7 +50,7 @@ export const pointLight = new THREE.PointLight(0xfff8be, 450, 300, 1.2);
 pointLight.position.y = cam.position.y = passedInFloor > 0 ? 1000 * passedInFloor : 0;
 scene.add(pointLight);
 export const obj = makeLift(scene, passedInFloor);
-export const { doorL, doorR, buttonU, buttonD, sign, display, music, light, donation, suggestion } = obj;
+export const { doorL, doorR, buttonU, buttonD, sign, display, music, light, donation, suggestion, smoothScroll } = obj;
 
 // load target floor and unload the last one
 export async function loadFloor() {

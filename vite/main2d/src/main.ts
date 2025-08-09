@@ -1,5 +1,5 @@
 import { FLOORS } from './constants';
-import { getConfig, toggleMusic, wait, writeConfig } from './helpers/control';
+import { getConfig, isMusic, isSmoothScroll, toggleMusic, toggleSmoothScroll, wait, writeConfig } from './helpers/control';
 import { disableStylesheet, enableStylesheet } from './helpers/css';
 import { clamp, realOrNotFoundFloor } from './helpers/math';
 import { fetchText } from './helpers/reader';
@@ -27,6 +27,9 @@ const musicButton = document.querySelector<SVGGElement>("#speaker-button")!;
 const musicLight = document.querySelector<SVGCircleElement>("#speaker-light")!;
 const donationBox = document.querySelector<SVGGElement>("#donation")!;
 const suggestionBox = document.querySelector<SVGGElement>("#suggestion-box")!;
+const smoothScroll = document.querySelector<SVGGElement>("#smooth-scroll")!;
+const yesSmooth = document.querySelector<SVGPathElement>("#yes-smooth")!;
+const noSmooth = document.querySelector<SVGPathElement>("#no-smooth")!;
 
 // elevator content
 const donationContent = new LazyLoader(() => fetchText("/contents/elevator/donation.html"));
@@ -200,6 +203,7 @@ musicButton.onclick = () => {
 	if (toggleMusic()) musicLight.style.fill = "#5acd9c";
 	else  musicLight.style.fill = "#103525";
 };
+if (isMusic()) musicLight.style.fill = "#5acd9c";
 
 donationBox.onmousedown = () => clickOnButton = true;
 donationBox.ontouchstart = () => clickOnButton = true;
@@ -212,6 +216,20 @@ suggestionBox.ontouchstart = () => clickOnButton = true;
 suggestionBox.onclick = async () => {
 	toggleContent(await suggestionContent.get(), true);
 };
+
+const smoothScrollStyle = (enabled: boolean) => {
+	if (enabled) {
+		yesSmooth.style.stroke = "#ffffff";
+		noSmooth.style.stroke = "#777777";
+	} else {
+		yesSmooth.style.stroke = "#777777";
+		noSmooth.style.stroke = "#ffffff";
+	}
+};
+smoothScroll.onmousedown = () => clickOnButton = true;
+smoothScroll.ontouchstart = () => clickOnButton = true;
+smoothScroll.onclick = () => smoothScrollStyle(toggleSmoothScroll());
+smoothScrollStyle(isSmoothScroll());
 
 // touch handlers for mobile support
 let touch = { ix: 0, x: 0, offset: 0 };

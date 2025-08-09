@@ -87,9 +87,8 @@ app.get("/uop-editor", (req, res) => {
 });
 
 // elevator
-app.get("/2d/:page?", (req, res, next) => {
-	if (isbot(req.get("user-agent")) || !PAGES.has(req.params.page || "ground")) next();
-	else res.sendFile("main2d.html", { root: path.resolve(__dirname, "../vite/main2d/dist") });
+app.get("/2d/:page?", (req, res) => {
+	res.redirect(301, `/${req.params.page || ""}?flat`);
 });
 app.get("/:page?", (req, res) => {
 	if (isbot(req.get("user-agent"))) {
@@ -104,7 +103,8 @@ app.get("/:page?", (req, res) => {
 		const content = fs.readFileSync(path.join(root, "contents", filename), { encoding: "utf8" });
 		template = template.replace("{content}", content);
 		res.send(template);
-	} else res.sendFile("main.html", { root: path.resolve(__dirname, "../vite/main/dist") });
+	} else if (req.query.flat !== undefined) res.sendFile("main2d.html", { root: path.resolve(__dirname, "../vite/main2d/dist") });
+	else res.sendFile("main.html", { root: path.resolve(__dirname, "../vite/main/dist") });
 });
 
 const server = app.listen(process.env.PORT || 3000, async () => {

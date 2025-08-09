@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { FLOORS } from "./constants";
 import { TEXTURE_LOADER } from "./loaders";
-import { isMusic } from "./helpers/control";
+import { isMusic, isSmoothScroll } from "./helpers/control";
 import { configTexture } from "./helpers/macro";
 
 type LiftObjects = { [key: string]: THREE.Mesh };
@@ -20,7 +20,8 @@ export function makeLift(scene: THREE.Scene, passedInFloor: number) {
 		makeFloor(scene),
 		makeWalls(scene),
 		makeButtons(scene),
-		makeSpeaker(scene),
+		makeLeftButtons(scene),
+		makeRightButtons(scene),
 		makeSign(scene)
 	);
 	if (passedInFloor > 0)
@@ -176,7 +177,7 @@ function makeSign(scene: THREE.Scene): LiftObjects {
 	return { sign };
 }
 
-function makeSpeaker(scene: THREE.Scene): LiftObjects {
+function makeLeftButtons(scene: THREE.Scene): LiftObjects {
 	const speakerGeometry = new THREE.BoxGeometry(15, 10, 8);
 	const speakerMaterial = new THREE.MeshStandardMaterial({ color: 0xe8e2ce });
 	const speaker = new THREE.Mesh(speakerGeometry, speakerMaterial);
@@ -236,6 +237,28 @@ function makeSpeaker(scene: THREE.Scene): LiftObjects {
 
 	scene.add(speaker, ball, music, light, donation, suggestion);
 	return { speaker, ball, music, light, donation, suggestion };
+}
+
+function makeRightButtons(scene: THREE.Scene): LiftObjects {
+	const smoothGeometry = new THREE.BoxGeometry(5, 10, 1);
+	const onTexture = new THREE.MeshStandardMaterial({ map: TEXTURE_LOADER.load("/assets/textures/elevator/smooth-scroll-on.svg", configTexture) });
+	const offTexture = new THREE.MeshStandardMaterial({ map: TEXTURE_LOADER.load("/assets/textures/elevator/smooth-scroll-off.svg", configTexture) });
+	const smoothMaterial = new THREE.MeshStandardMaterial({ color: 0x02583b });
+	const smoothMaterials = [
+		smoothMaterial,
+		smoothMaterial,
+		smoothMaterial,
+		smoothMaterial,
+		onTexture,
+		offTexture,
+	];
+	const smoothScroll = new THREE.Mesh(smoothGeometry, smoothMaterials);
+	smoothScroll.position.set(33.5, -17, -48.25);
+	if (!isSmoothScroll())
+		smoothScroll.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+	scene.add(smoothScroll);
+
+	return { smoothScroll };
 }
 
 export function displayTexture(floor: string | number | null) {

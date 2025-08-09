@@ -1,10 +1,10 @@
 import * as THREE from "three";
-import { scene, buttonD, buttonU, display, doorL, doorR, midX, midY, sign, pointLight, obj, loadFloor, music, light, donation, suggestion } from ".";
+import { scene, buttonD, buttonU, display, doorL, doorR, midX, midY, sign, pointLight, obj, loadFloor, music, light, donation, suggestion, smoothScroll } from ".";
 import { toggleContent } from "./helpers/html";
 import { CONTENTS, FLOORS } from "./constants";
 import { displayTexture } from "./generators";
 import { camera, currentFloor, DEBUG, floor, ratio, rotatedX, rotatedY, started, targetFloor, touched } from "./states";
-import { getConfig, toggleMusic, wait } from "./helpers/control";
+import { getConfig, toggleMusic, toggleSmoothScroll, wait } from "./helpers/control";
 import { clamp } from "./helpers/math";
 
 enum State {
@@ -97,7 +97,7 @@ window.addEventListener("mousemove", (e) => {
 	const mouse2D = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
 	const raycaster = new THREE.Raycaster();
 	raycaster.setFromCamera(mouse2D, camera());
-	const check: THREE.Object3D[] = [buttonU, buttonD, display, sign, music, light, donation, suggestion];
+	const check: THREE.Object3D[] = [buttonU, buttonD, display, sign, music, light, donation, suggestion, smoothScroll];
 	if (floor()?.listenMove) check.push(...floor()!.moveCheck());
 	const intersect = raycaster.intersectObjects(check);
 	if (intersect.length > 0) document.body.style.cursor = "pointer";
@@ -138,6 +138,12 @@ function clickEventsCommon(e: { clientX: number, clientY: number }) {
 	} else if (raycaster.intersectObject(suggestion).length > 0) {
 		toggleContent({ html: () => CONTENTS.get(1001)!.get(), noFunc: true });
 		start = true;
+	} else if (raycaster.intersectObject(smoothScroll).length > 0) {
+		if (toggleSmoothScroll()) {
+			smoothScroll.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), 0);
+		} else {
+			smoothScroll.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+		}
 	} else if (floor()?.listenClick) {
 		floor()!.clickRaycast(raycaster);
 		start = true;
