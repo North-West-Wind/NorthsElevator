@@ -26,7 +26,6 @@ export function setupHandlers(main3d: Main3D) {
 	let diff = 0, scrollDisplacement = 0, scrollVelocity = 0;
 
 	window.addEventListener("touchstart", (e) => {
-		e.preventDefault();
 		var x, y;
 		if (e.touches.length == 2) {
 			separation = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
@@ -39,10 +38,10 @@ export function setupHandlers(main3d: Main3D) {
 		touch.originX = touch.ix = touch.x = x;
 		touch.originY = touch.iy = touch.y = y;
 		main3d.touched = true;
+		main3d.lastTouched = Date.now();
 	});
 
 	window.addEventListener("touchmove", (e) => {
-		e.preventDefault();
 		var x, y, newSeparation = 0;
 		if (e.touches.length == 2) {
 			newSeparation = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
@@ -60,30 +59,40 @@ export function setupHandlers(main3d: Main3D) {
 			x: offsets.x + (x - touch.ix) / Math.max(window.innerWidth, window.innerHeight),
 			y: offsets.y + (y - touch.iy) / Math.max(window.innerWidth, window.innerHeight),
 		};
-		let noMove = false;
-		if (main3d.ratio > 1) noMove = Math.abs(newOffsets.x) > window.innerWidth / 16 || Math.abs(newOffsets.y) > window.innerHeight / 12;
-		else if (main3d.ratio < 1) noMove = Math.abs(newOffsets.y) > window.innerHeight / 16 || Math.abs(newOffsets.x) > window.innerWidth / 12;
-		else noMove = Math.abs(newOffsets.x) > window.innerWidth / 12 || Math.abs(newOffsets.y) > window.innerHeight / 12;
-		if (!noMove && div.classList.contains("hidden")) {
+		if (div.classList.contains("hidden")) {
+			let noMove = false;
+			if (main3d.ratio > 1) noMove = Math.abs(newOffsets.x) > window.innerWidth / 16 || Math.abs(newOffsets.y) > window.innerHeight / 12;
+			else if (main3d.ratio < 1) noMove = Math.abs(newOffsets.y) > window.innerHeight / 16 || Math.abs(newOffsets.x) > window.innerWidth / 12;
+			else noMove = Math.abs(newOffsets.x) > window.innerWidth / 12 || Math.abs(newOffsets.y) > window.innerHeight / 12;
+			if (!noMove) {
+				touch.ix = touch.x;
+				touch.iy = touch.y;
+				touch.x = x;
+				touch.y = y;
+				offsets.x = newOffsets.x;
+				offsets.y = newOffsets.y;
+				if (offsets.x > 2) offsets.x = 2;
+				else if (offsets.x < -2) offsets.x = -2;
+				if (offsets.y > 1) offsets.y = 1;
+				else if (offsets.y < -1) offsets.y = -1;
+			}
+		} else {
 			touch.ix = touch.x;
 			touch.iy = touch.y;
 			touch.x = x;
 			touch.y = y;
-			offsets.x = newOffsets.x;
-			offsets.y = newOffsets.y;
-			if (offsets.x > 2) offsets.x = 2;
-			else if (offsets.x < -2) offsets.x = -2;
-			if (offsets.y > 1) offsets.y = 1;
-			else if (offsets.y < -1) offsets.y = -1;
 		}
+		main3d.lastTouched = Date.now();
 	});
 
 	window.addEventListener("touchend", (e) => {
-		e.preventDefault();
-		if (!e.touches.length) main3d.touched = true;
+		if (!e.touches.length) {
+			main3d.touched = false;
+			main3d.lastTouched = Date.now();
+		}
 		if (touch.x == touch.originX && touch.y == touch.originY) {
 			clickEventsCommon({ clientX: touch.x, clientY: touch.y });
-			if (!div.classList.contains("visuallyhidden") && e.touches.length == 0 && touch.originX == touch.x && touch.originY == touch.y) main3d.toggleContent(main3d.floor);
+			//if (!div.classList.contains("visuallyhidden") && e.touches.length == 0 && touch.originX == touch.x && touch.originY == touch.y) main3d.toggleContent(main3d.floor);
 		} else {
 			if (e.touches.length) {
 				touch.ix = touch.x = e.touches[0].clientX;
@@ -101,12 +110,12 @@ export function setupHandlers(main3d: Main3D) {
 	});
 
 	window.addEventListener("mousedown", e => {
-		if (e.button !== 0) return;
+		if (e.button !== 0 || Date.now() - main3d.lastTouched < 1000) return;
 		clickEventsCommon(e);
 	});
 
 	window.addEventListener("mousemove", (e) => {
-		if (Elevator.DEBUG) return;
+		if (Elevator.DEBUG || Date.now() - main3d.lastTouched < 1000) return;
 		offsets.x = -((e.clientX - main3d.midX) / main3d.midX) * 2;
 		offsets.y = -((e.clientY - main3d.midY) / main3d.midY);
 		const mouse2D = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
@@ -120,11 +129,13 @@ export function setupHandlers(main3d: Main3D) {
 	});
 
 	window.addEventListener("mouseup", () => {
+		if (Date.now() - main3d.lastTouched < 1000) return;
 		if (buttonU.material.color.getHex() != 0xbbbbbb) { buttonU.material.color.setHex(0xbbbbbb); buttonU.position.z = -48.25 }
 		if (buttonD.material.color.getHex() != 0xbbbbbb) { buttonD.material.color.setHex(0xbbbbbb); buttonD.position.z = -48.25 }
 	});
 
 	function clickEventsCommon(e: { clientX: number, clientY: number }) {
+		if (!div.classList.contains("hidden")) return;
 		const mouse2D = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
 		const raycaster = new THREE.Raycaster();
 		raycaster.setFromCamera(mouse2D, main3d.camera);
