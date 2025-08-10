@@ -298,9 +298,8 @@ function makeRightButtons(scene: THREE.Scene): LiftObjects {
 }
 
 export function displayTexture(floor: string | number | null) {
-	var x = document.createElement("canvas");
+	const x = new OffscreenCanvas(400, 400);
 	var xc = x.getContext("2d")!;
-	x.width = x.height = 400;
 	xc.fillStyle = "#555555";
 	xc.fillRect(0, 0, x.width, x.height);
 	xc.fillStyle = "black";
@@ -312,7 +311,7 @@ export function displayTexture(floor: string | number | null) {
 	if (floor !== 0 && !floor) xc.fillText("?", x.width / 2, x.height / 2);
 	else if (typeof floor == "string") xc.fillText(floor, x.width / 2, x.height / 2);
 	else xc.fillText(floor <= 0 ? "G" : floor.toString(), x.width / 2, x.height / 2);
-	const texture = new THREE.Texture(x);
+	const texture = new THREE.CanvasTexture(x);
 	texture.generateMipmaps = false;
 	texture.minFilter = THREE.LinearFilter;
 	texture.needsUpdate = true;
