@@ -54,17 +54,21 @@ export function setupHandlers(main3d: Main3D) {
 			x = e.touches[0].clientX;
 			y = e.touches[0].clientY;
 		}
-		let canMove = false;
-		if (main3d.ratio > 1) canMove = Math.abs(x - touch.ix) > window.innerWidth / 16 || Math.abs(y - touch.iy) > window.innerHeight / 12;
-		else if (main3d.ratio < 1) canMove = Math.abs(y - touch.iy) > window.innerHeight / 16 || Math.abs(x - touch.ix) > window.innerWidth / 12;
-		else canMove = Math.abs(x - touch.ix) > window.innerWidth / 12 || Math.abs(y - touch.iy) > window.innerHeight / 12;
-		if (canMove && div.classList.contains("hidden")) {
+		const newOffsets = {
+			x: offsets.x + (x - touch.ix) / main3d.midX * 2,
+			y: offsets.y + (y - touch.iy) / main3d.midY * 2,
+		};
+		let noMove = false;
+		if (main3d.ratio > 1) noMove = Math.abs(newOffsets.x) > window.innerWidth / 16 || Math.abs(newOffsets.y) > window.innerHeight / 12;
+		else if (main3d.ratio < 1) noMove = Math.abs(newOffsets.y) > window.innerHeight / 16 || Math.abs(newOffsets.x) > window.innerWidth / 12;
+		else noMove = Math.abs(newOffsets.x) > window.innerWidth / 12 || Math.abs(newOffsets.y) > window.innerHeight / 12;
+		if (!noMove && div.classList.contains("hidden")) {
 			touch.ix = touch.x;
 			touch.iy = touch.y;
 			touch.x = x;
 			touch.y = y;
-			offsets.x += (touch.x - touch.ix) / main3d.midX * 2;
-			offsets.y += (touch.y - touch.iy) / main3d.midY * 2;
+			offsets.x = newOffsets.x;
+			offsets.y = newOffsets.y;
 			if (offsets.x > 2) offsets.x = 2;
 			else if (offsets.x < -2) offsets.x = -2;
 			if (offsets.y > 1) offsets.y = 1;
@@ -73,7 +77,7 @@ export function setupHandlers(main3d: Main3D) {
 	});
 
 	window.addEventListener("touchend", (e) => {
-		if (!e.touches.length) main3d.touched = false;
+		if (!e.touches.length) main3d.touchEnd = true;
 		if (touch.x == touch.originX && touch.y == touch.originY) {
 			clickEventsCommon({ clientX: touch.x, clientY: touch.y });
 			if (!div.classList.contains("visuallyhidden") && e.touches.length == 0 && touch.originX == touch.x && touch.originY == touch.y) main3d.toggleContent(main3d.floor);
@@ -99,6 +103,11 @@ export function setupHandlers(main3d: Main3D) {
 	});
 
 	window.addEventListener("mousemove", (e) => {
+		// For some reason, mousemove is fired at touchend
+		if (main3d.touchEnd) {
+			main3d.touched = false;
+			return;
+		}
 		if (Elevator.DEBUG || main3d.touched) return;
 		offsets.x = -((e.clientX - main3d.midX) / main3d.midX) * 2;
 		offsets.y = -((e.clientY - main3d.midY) / main3d.midY);
