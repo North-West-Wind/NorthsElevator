@@ -94,6 +94,8 @@ export class Main3D extends Elevator {
 }
 
 export default async function init3D() {
+	// Preload font for textures later
+	await document.fonts.load('10pt "YosterIsland"');
 	const main3d = new Main3D();
 
   const xm = new THREE.MeshStandardMaterial({ map: displayTexture(main3d.passedInFloor), transparent: true });

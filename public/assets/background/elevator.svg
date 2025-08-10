@@ -170,13 +170,17 @@
       <text
          xml:space="preserve"
          style="font-size:20px;line-height:1.25;text-align:center;display:inline"
-         x="416.76251"
+         x="415.63947"
          y="140.3418"
-         id="text1">             <tspan
-   id="floor"
-   x="416.76251"
-   y="140.3418"
-   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20px;font-family:'Courier NEw';-inkscape-font-specification:'Courier NEw';fill:#ff0000">G</tspan>          </text>
+         id="text1"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'YosterIsland';-inkscape-font-specification:'YosterIsland'"
+           id="tspan1">   </tspan><tspan
+           id="floor"
+           x="415.63947"
+           y="140.3418"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20px;font-family:'YosterIsland';-inkscape-font-specification:'YosterIsland';fill:#ff0000">G</tspan><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'YosterIsland';-inkscape-font-specification:'YosterIsland'"
+           id="tspan2"> </tspan></text>
     </g>
     <g
        id="speaker">

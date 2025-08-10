@@ -306,7 +306,7 @@ export function displayTexture(floor: string | number | null) {
 	xc.fillStyle = "black";
 	xc.fillRect(20, 20, x.width - 40, x.height - 40);
 	xc.fillStyle = "red";
-	xc.font = "256px 'Courier New'";
+	xc.font = "256px 'YosterIsland'";
 	xc.textAlign = "center";
 	xc.textBaseline = "middle";
 	if (floor !== 0 && !floor) xc.fillText("?", x.width / 2, x.height / 2);

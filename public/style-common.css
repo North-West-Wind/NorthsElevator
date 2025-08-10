@@ -3,6 +3,11 @@
 	src: url('/assets/odin-rounded.regular.otf') format("opentype");
 }
 
+@font-face {
+	font-family: 'YosterIsland';
+	src: url('/assets/yoster.ttf');
+}
+
 html {
 	overscroll-behavior: none;
 }
