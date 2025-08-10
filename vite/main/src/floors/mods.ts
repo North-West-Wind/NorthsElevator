@@ -7,7 +7,8 @@ import { configTexture } from "../helpers/macro";
 
 enum ModPage {
 	AUTO_FISH = "auto-fish",
-	MORE_BOOTS = "more-boots"
+	MORE_BOOTS = "more-boots",
+	SHORT_CIRCUIT = "short-circuit"
 };
 
 const WATER_TEXTURES: THREE.Texture[] = [];
@@ -92,6 +93,22 @@ export default class ModsFloor extends Floor {
 		armorStand.rotation.set(0, Math.PI / 4, 0);
 		armorStand.scale.set(20, 20, 20);
 		scene.add(armorStand);
+
+		const repeater = await GLTF_LOADED.repeater.get();
+		const recursiveRough = (group: THREE.Group) => {
+			group.children.forEach(child => {
+				if (child.children.length) recursiveRough(child as THREE.Group);
+				else if (child instanceof THREE.Mesh) {
+					child.material.metalness = 0;
+					child.material.roughness = 10;
+				}
+			});
+		};
+		recursiveRough(repeater);
+		repeater.position.set(-26, this.num * 1000 - 28.8, -120);
+		repeater.scale.set(10, 10, 10);
+		repeater.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI * 0.5);
+		scene.add(repeater);
 	
 		/*const geometryC = new THREE.BoxGeometry(16, 16, 80);
 		const material = new THREE.MeshBasicMaterial({ color: 0xa0a6a7 });
@@ -123,7 +140,7 @@ export default class ModsFloor extends Floor {
 		bootR.translateX(2.5);
 		scene.add(bootL, bootR);
 	
-		return { ocean, oakFloor, pointLight: spotLight, fishingRod, string, holder, armorStand, bootL, bootR };
+		return { ocean, oakFloor, pointLight: spotLight, fishingRod, string, holder, armorStand, repeater, bootL, bootR };
 	}
 
 	despawn(scene: THREE.Scene) {
@@ -160,11 +177,12 @@ export default class ModsFloor extends Floor {
 		if (this.meshes) {
 			if (raycaster.intersectObjects([<THREE.Mesh>this.meshes.fishingRod, <THREE.Mesh>this.meshes.string, <THREE.Mesh>this.meshes.holder]).length) this.toggleModInfo(ModPage.AUTO_FISH);
 			else if (raycaster.intersectObjects([<THREE.Group>this.meshes.armorStand, <THREE.Mesh>this.meshes.bootL, <THREE.Mesh>this.meshes.bootR]).length) this.toggleModInfo(ModPage.MORE_BOOTS);
+			else if (raycaster.intersectObject(this.meshes.repeater).length) this.toggleModInfo(ModPage.SHORT_CIRCUIT);
 		}
 	}
 
 	moveCheck() {
-		if (this.meshes) return [this.meshes.fishingRod, this.meshes.string, this.meshes.holder, this.meshes.armorStand, this.meshes.bootL, this.meshes.bootR];
+		if (this.meshes) return [this.meshes.fishingRod, this.meshes.string, this.meshes.holder, this.meshes.armorStand, this.meshes.bootL, this.meshes.bootR, this.meshes.repeater];
 		else return super.moveCheck();
 	}
 

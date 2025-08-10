@@ -5,6 +5,7 @@ import { LazyLoader } from "../types/misc";
 
 const MODELS = [
 	"armor_stand",
+	"repeater",
 	"desk",
 	"piano",
 	"campfire",
