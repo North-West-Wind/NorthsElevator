@@ -23,6 +23,7 @@ export class Main3D extends Elevator {
 	rotatedX = 0;
 	rotatedY = 0;
 	ratio = window.innerWidth / window.innerHeight;
+	touched = false;
 
 	constructor() {
 		super(false);

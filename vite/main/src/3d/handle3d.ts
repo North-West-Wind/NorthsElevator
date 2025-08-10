@@ -38,6 +38,7 @@ export function setupHandlers(main3d: Main3D) {
 		}
 		touch.originX = touch.ix = touch.x = x;
 		touch.originY = touch.iy = touch.y = y;
+		main3d.touched = true;
 	});
 
 	window.addEventListener("touchmove", (e) => {
@@ -79,6 +80,7 @@ export function setupHandlers(main3d: Main3D) {
 
 	window.addEventListener("touchend", (e) => {
 		e.preventDefault();
+		if (!e.touches.length) main3d.touched = true;
 		if (touch.x == touch.originX && touch.y == touch.originY) {
 			clickEventsCommon({ clientX: touch.x, clientY: touch.y });
 			if (!div.classList.contains("visuallyhidden") && e.touches.length == 0 && touch.originX == touch.x && touch.originY == touch.y) main3d.toggleContent(main3d.floor);
