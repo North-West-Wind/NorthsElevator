@@ -3,7 +3,7 @@ import { TEXTURE_LOADER } from "./loaders";
 import { isMusic, isSmoothScroll } from "../helpers/control";
 import { configTexture } from "../helpers/macro";
 
-type LiftObjects = { [key: string]: THREE.Mesh };
+type LiftObjects = { [key: string]: THREE.Mesh | THREE.Group };
 
 let objects: LiftObjects = {};
 
@@ -234,8 +234,21 @@ function makeLeftButtons(scene: THREE.Scene): LiftObjects {
 	suggestion.position.set(-5, -8, 0);
 	suggestion.position.add(new THREE.Vector3(-34.5, -16, -50));
 
-	scene.add(speaker, ball, music, light, donation, suggestion);
-	return { speaker, ball, music, light, donation, suggestion };
+	const holeShape = new THREE.Shape();
+	holeShape.moveTo(-3, 0);
+	holeShape.lineTo(3, 0);
+	holeShape.quadraticCurveTo(4, 0, 4, 1);
+	holeShape.quadraticCurveTo(4, 2, 3, 2);
+	holeShape.lineTo(-3, 2);
+	holeShape.quadraticCurveTo(-4, 2, -4, 1);
+	holeShape.quadraticCurveTo(-4, 0, -3, 0);
+	const holeGeometry = new THREE.ShapeGeometry(holeShape);
+	const holeMaterial = new THREE.MeshStandardMaterial({ color: 0xb5d2d4 });
+	const hole = new THREE.Mesh(holeGeometry, holeMaterial);
+	hole.position.add(new THREE.Vector3(-34.5, -16, -45.8));
+
+	scene.add(speaker, ball, music, light, donation, suggestion, hole);
+	return { speaker, ball, music, light, donation, suggestion, hole };
 }
 
 function makeRightButtons(scene: THREE.Scene): LiftObjects {
@@ -255,9 +268,33 @@ function makeRightButtons(scene: THREE.Scene): LiftObjects {
 	smoothScroll.position.set(33.5, -17, -48.25);
 	if (!isSmoothScroll())
 		smoothScroll.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
-	scene.add(smoothScroll);
 
-	return { smoothScroll };
+	const twoDimension = new THREE.Group();
+	const layer1Geometry = new THREE.BoxGeometry(7, 7, 0.5);
+	const layer1Material = new THREE.MeshStandardMaterial({ color: 0x95ffae });
+	const layer1 = new THREE.Mesh(layer1Geometry, layer1Material);
+	layer1.position.set(33.5, 17, -48.25);
+
+	const layer2Geometry = new THREE.BoxGeometry(7, 7, 1);
+	const layer2Material = new THREE.MeshStandardMaterial({ color: 0xeaff95 });
+	const layer2 = new THREE.Mesh(layer2Geometry, layer2Material);
+	layer2.setRotationFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI * 0.25);
+	layer2.position.set(33.5, 17, -48.25);
+
+	const squareGeometry = new THREE.BoxGeometry(3, 3, 1.01);
+	const squareMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+	const square = new THREE.Mesh(squareGeometry, squareMaterial);
+	square.position.set(33.5, 17, -48.25);
+
+	const strokeGeometry = new THREE.EdgesGeometry(squareGeometry);
+	const strokeMaterial = new THREE.LineBasicMaterial({ color: 0 });
+	const stroke = new THREE.LineSegments(strokeGeometry, strokeMaterial);
+	stroke.position.set(33.5, 17, -48.25);
+
+	twoDimension.add(layer1, layer2, square, stroke);
+	scene.add(smoothScroll, twoDimension);
+
+	return { smoothScroll, twoDimension };
 }
 
 export function displayTexture(floor: string | number | null) {

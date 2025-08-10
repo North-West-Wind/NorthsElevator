@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
    class="bg"
-   viewBox="-100 0 708 285.75"
+   viewBox="-100 0 708 285.75131"
    version="1.1"
    id="svg5"
-	 width="69420"
-	 height="141"
+   width="708"
+   height="285.75131"
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
@@ -33,7 +33,8 @@
   </defs>
   <g
      id="layer2"
-     style="display:inline">
+     style="display:inline"
+     transform="translate(-1.7650922e-7,0.00129741)">
     <rect
        style="fill:#cccccc;fill-opacity:1;stroke-width:0.251688"
        id="left-door"
@@ -53,7 +54,8 @@
   </g>
   <g
      id="layer1"
-     style="display:inline">
+     style="display:inline"
+     transform="translate(-1.7650922e-7,0.00129741)">
     <path
        id="path1"
        style="fill:#636363;fill-opacity:1;stroke-width:1.58544"
@@ -374,6 +376,64 @@
              d="m 38.341801,33.79382 -0.173104,0.615535 -0.357897,0.244298 -0.333039,-0.270046 -0.113091,-0.6262 0.173105,-0.615535 0.357897,-0.244298 0.333038,0.270046 z" />
         </g>
       </g>
+    </g>
+    <g
+       id="three-dim"
+       transform="translate(23.700589,8.0966058)"
+       class="elevator-button">
+      <rect
+         style="fill:#95ffae;fill-opacity:1;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke"
+         id="rect25"
+         width="36"
+         height="36"
+         x="381"
+         y="57.054218" />
+      <rect
+         style="fill:#eaff95;fill-opacity:1;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke"
+         id="rect26"
+         width="36"
+         height="36"
+         x="317.20694"
+         y="-247.06425"
+         transform="rotate(45)" />
+      <g
+         id="g20"
+         style="display:inline;fill:#95dfff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;paint-order:fill markers stroke;stop-color:#000000">
+        <path
+           id="path25"
+           style="fill:#e9e9ff;fill-rule:evenodd;stroke:none;stroke-linejoin:round"
+           d="m 400.73319,65.864081 11.58347,7.411967 -7.24631,11.324573 -11.58346,-7.411967 z"
+           points="412.31666,73.276048 405.07035,84.600621 393.48689,77.188654 400.73319,65.864081 " />
+        <path
+           id="path20"
+           style="fill:#714b00"
+           d="m 392.92963,65.507792 -7.24631,11.324573 7.80357,0.356289 7.2463,-11.324573 z"
+           points="385.68332,76.832365 393.48689,77.188654 400.73319,65.864081 392.92963,65.507792 " />
+        <path
+           id="path24"
+           style="fill:#c88500"
+           d="m 385.68332,76.832365 11.58347,7.411966 7.80356,0.35629 -11.58346,-7.411967 z"
+           points="397.26679,84.244331 405.07035,84.600621 393.48689,77.188654 385.68332,76.832365 " />
+        <path
+           id="path21"
+           style="fill:#e5e5e5"
+           d="m 392.92963,65.507792 11.58347,7.411967 7.80356,0.356289 -11.58347,-7.411967 z"
+           points="404.5131,72.919759 412.31666,73.276048 400.73319,65.864081 392.92963,65.507792 " />
+        <path
+           id="path23"
+           style="fill:#f6f6f6"
+           d="m 404.5131,72.919759 -7.24631,11.324572 7.80356,0.35629 7.24631,-11.324573 z"
+           points="397.26679,84.244331 405.07035,84.600621 412.31666,73.276048 404.5131,72.919759 " />
+        <path
+           id="path22"
+           style="fill:#c3c3c3"
+           d="m 392.92963,65.507792 11.58347,7.411967 -7.24631,11.324572 -11.58347,-7.411966 z"
+           points="404.5131,72.919759 397.26679,84.244331 385.68332,76.832365 392.92963,65.507792 " />
+      </g>
+      <path
+         id="rect27"
+         style="fill:none;fill-opacity:1;stroke:#f79444;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;paint-order:fill markers stroke"
+         d="m 399.00038,49.598312 -7.45507,7.455078 h -10.54493 v 10.542969 l -7.45703,7.457031 7.45703,7.457031 V 93.05339 h 10.54297 l 7.45703,7.45703 7.45704,-7.45703 h 10.54296 V 82.508468 l 7.45508,-7.455078 -7.45508,-7.455078 V 57.05339 h -10.54492 z" />
     </g>
   </g>
 </svg>

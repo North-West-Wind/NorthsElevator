@@ -15,7 +15,7 @@ enum State {
 };
 
 export function setupHandlers(main3d: Main3D) {
-	const { buttonU, buttonD, doorL, doorR, display, sign, music, light, donation, suggestion, smoothScroll } = main3d.objects;
+	const { buttonU, buttonD, doorL, doorR, display, sign, music, light, donation, suggestion, smoothScroll, twoDimension } = main3d.objects;
 
 	// various variables
 	let state = State.INSIDE;
@@ -105,7 +105,7 @@ export function setupHandlers(main3d: Main3D) {
 		const mouse2D = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
 		const raycaster = new THREE.Raycaster();
 		raycaster.setFromCamera(mouse2D, main3d.camera);
-		const check: THREE.Object3D[] = [buttonU, buttonD, display, sign, music, light, donation, suggestion, smoothScroll];
+		const check: THREE.Object3D[] = [buttonU, buttonD, display, sign, music, light, donation, suggestion, smoothScroll, twoDimension];
 		if (main3d.floor?.listenMove) check.push(...main3d.floor.moveCheck());
 		const intersect = raycaster.intersectObjects(check);
 		if (intersect.length > 0) document.body.style.cursor = "pointer";
@@ -140,7 +140,7 @@ export function setupHandlers(main3d: Main3D) {
 			main3d.toggleContent(floorOverride, () => floorOverride.content.get());
 			start = true;
 		} else if (raycaster.intersectObjects([music, light]).length > 0) {
-			(light.material as THREE.MeshBasicMaterial).color.setHex(toggleMusic() ? 0x5acd9c : 0x103525);
+			((<THREE.Mesh<any, THREE.MeshStandardMaterial>>light).material).color.setHex(toggleMusic() ? 0x5acd9c : 0x103525);
 		} else if (raycaster.intersectObject(donation).length > 0) {
 			main3d.toggleContent(undefined, () => main3d.contentByNum(1000));
 			start = true;
@@ -153,6 +153,8 @@ export function setupHandlers(main3d: Main3D) {
 			} else {
 				smoothScroll.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 			}
+		} else if (raycaster.intersectObject(twoDimension).length > 0) {
+			window.location.href = window.location.pathname + (window.location.search ? window.location.search + "&flat" : "?flat");
 		} else if (main3d.floor?.listenClick) {
 			main3d.floor.clickRaycast(raycaster);
 			start = true;

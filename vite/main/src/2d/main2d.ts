@@ -19,6 +19,7 @@ export class Main2D extends Elevator {
 	readonly smoothScroll = document.querySelector<SVGGElement>("#smooth-scroll")!;
 	readonly yesSmooth = document.querySelector<SVGPathElement>("#yes-smooth")!;
 	readonly noSmooth = document.querySelector<SVGPathElement>("#no-smooth")!;
+	readonly threeDimension = document.querySelector<SVGGElement>("#three-dim")!;
 
 	moving = 0; // 1 means up, -1 means down, 0 means not moving
 	state = 0; // 0 inside, 1 opening, 2 zooming, 3 htmling, 4 backing, 5 stay, 6 closing

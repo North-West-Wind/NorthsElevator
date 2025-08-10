@@ -84,6 +84,17 @@ export function setupHandlers(main2d: Main2D) {
 	main2d.smoothScroll.onclick = () => smoothScrollStyle(toggleSmoothScroll());
 	smoothScrollStyle(isSmoothScroll());
 
+	otherButtonSetup(main2d.threeDimension);
+	main2d.threeDimension.onclick = () => {
+		if (getConfig().flat) {
+			getConfig().flat = false;
+			writeConfig();
+		}
+		const search = new URLSearchParams(window.location.search);
+		search.delete("flat");
+		window.location.href = window.location.pathname + search;
+	};
+
 	// touch handlers for mobile support
 	let touch = { ix: 0, x: 0, offset: 0 };
 	let canTouch = false, mouseDown = false;
