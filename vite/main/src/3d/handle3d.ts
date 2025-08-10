@@ -26,6 +26,7 @@ export function setupHandlers(main3d: Main3D) {
 	let diff = 0, scrollDisplacement = 0, scrollVelocity = 0;
 
 	window.addEventListener("touchstart", (e) => {
+		e.preventDefault();
 		var x, y;
 		if (e.touches.length == 2) {
 			separation = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
@@ -37,10 +38,10 @@ export function setupHandlers(main3d: Main3D) {
 		}
 		touch.originX = touch.ix = touch.x = x;
 		touch.originY = touch.iy = touch.y = y;
-		main3d.touched = true;
 	});
 
 	window.addEventListener("touchmove", (e) => {
+		e.preventDefault();
 		var x, y, newSeparation = 0;
 		if (e.touches.length == 2) {
 			newSeparation = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
@@ -55,8 +56,8 @@ export function setupHandlers(main3d: Main3D) {
 			y = e.touches[0].clientY;
 		}
 		const newOffsets = {
-			x: offsets.x + (x - touch.ix) / main3d.midX * 2,
-			y: offsets.y + (y - touch.iy) / main3d.midY * 2,
+			x: offsets.x + (x - touch.ix) / Math.max(window.innerWidth, window.innerHeight),
+			y: offsets.y + (y - touch.iy) / Math.max(window.innerWidth, window.innerHeight),
 		};
 		let noMove = false;
 		if (main3d.ratio > 1) noMove = Math.abs(newOffsets.x) > window.innerWidth / 16 || Math.abs(newOffsets.y) > window.innerHeight / 12;
@@ -77,7 +78,7 @@ export function setupHandlers(main3d: Main3D) {
 	});
 
 	window.addEventListener("touchend", (e) => {
-		if (!e.touches.length) main3d.touchEnd = true;
+		e.preventDefault();
 		if (touch.x == touch.originX && touch.y == touch.originY) {
 			clickEventsCommon({ clientX: touch.x, clientY: touch.y });
 			if (!div.classList.contains("visuallyhidden") && e.touches.length == 0 && touch.originX == touch.x && touch.originY == touch.y) main3d.toggleContent(main3d.floor);
@@ -98,17 +99,12 @@ export function setupHandlers(main3d: Main3D) {
 	});
 
 	window.addEventListener("mousedown", e => {
-		if (main3d.touched || e.button !== 0) return;
+		if (e.button !== 0) return;
 		clickEventsCommon(e);
 	});
 
 	window.addEventListener("mousemove", (e) => {
-		// For some reason, mousemove is fired at touchend
-		if (main3d.touchEnd) {
-			main3d.touched = false;
-			return;
-		}
-		if (Elevator.DEBUG || main3d.touched) return;
+		if (Elevator.DEBUG) return;
 		offsets.x = -((e.clientX - main3d.midX) / main3d.midX) * 2;
 		offsets.y = -((e.clientY - main3d.midY) / main3d.midY);
 		const mouse2D = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
@@ -122,7 +118,6 @@ export function setupHandlers(main3d: Main3D) {
 	});
 
 	window.addEventListener("mouseup", () => {
-		if (main3d.touched) return main3d.touched = false;
 		if (buttonU.material.color.getHex() != 0xbbbbbb) { buttonU.material.color.setHex(0xbbbbbb); buttonU.position.z = -48.25 }
 		if (buttonD.material.color.getHex() != 0xbbbbbb) { buttonD.material.color.setHex(0xbbbbbb); buttonD.position.z = -48.25 }
 	});
