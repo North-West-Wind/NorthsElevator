@@ -13,11 +13,18 @@ export function setupHandlers(main2d: Main2D) {
 		  clickOnButton = true;
 		  button.style.fill = "#f7eb93";
 		};
-		button.ontouchstart = () => {
+		button.ontouchstart = (e) => {
+			e.preventDefault();
 		  clickOnButton = true;
 		  button.style.fill = "#f7eb93";
 		};
-		button.onclick = () => {
+		button.ontouchend = (e) => {
+			e.preventDefault();
+		  button.style.fill = "#bbbbbb";
+		  main2d.targetFloor = deltaFloor > 0 ? Math.min(main2d.floors.size - 1, main2d.targetFloor + deltaFloor) : Math.max(0, main2d.targetFloor + deltaFloor);
+		  main2d.updateDisplay();
+		};
+		button.onmouseup = () => {
 		  button.style.fill = "#bbbbbb";
 		  main2d.targetFloor = deltaFloor > 0 ? Math.min(main2d.floors.size - 1, main2d.targetFloor + deltaFloor) : Math.max(0, main2d.targetFloor + deltaFloor);
 		  main2d.updateDisplay();

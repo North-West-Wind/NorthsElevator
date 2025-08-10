@@ -267,10 +267,10 @@ a:hover, .link-like *:hover {
   height: auto;
   min-height: 100%;
   min-width: 100%;
-  bottom: 0;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  position: relative;
+  transform: translate(-50%, -50%);
+  position: fixed;
 }
 
 .elevator-button:hover {
@@ -407,6 +407,27 @@ svg * {
 	font-size: 2vw;
 	opacity: 0;
 	transition: opacity 2s linear;
+}
+
+@media (orientation: portrait) {
+	#summatia-say {
+		font-size: 5vh;
+		padding: 3vh 0;
+	}
+
+	#summatia-ans {
+		font-size: 3vh;
+		padding: 4vh;
+	}
+
+	/* Can't figure out how to layout better so let's just ignore it lol */
+	#summatia-reset {
+		display: none;
+	}
+
+	#summatia-auto {
+		display: none;
+	}
 }
 
 .background svg .brow {
