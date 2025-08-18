@@ -23,6 +23,7 @@ The navigation should be the same
 Help fund my server's running cost! :>
 - [Ko-Fi](https://ko-fi.com/nww)
 - [Liberapay](https://liberapay.com/NorthWestWind)
+
 ![](/public/assets/images/sumtea.png)
 
 # License
