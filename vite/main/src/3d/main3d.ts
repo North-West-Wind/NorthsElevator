@@ -26,6 +26,10 @@ export class Main3D extends Elevator {
 	touched = false;
 	lastTouched = 0;
 
+	// HTML stuff
+	readonly info = document.querySelector<HTMLDivElement>("#info")!;
+	readonly stampDiv = document.querySelector<HTMLDivElement>("div[web-stamp]")!;
+
 	constructor() {
 		super(false);
 		const config = getConfig();

@@ -6,6 +6,7 @@ export class Main2D extends Elevator {
 	readonly background = document.querySelector<HTMLDivElement>("#background")!;
 	readonly elevator = document.querySelector<HTMLDivElement>("#elevator")!;
 	readonly info = document.querySelector<HTMLDivElement>("#info")!;
+	readonly stampDiv = document.querySelector<HTMLDivElement>("div[web-stamp]")!;
 	readonly upButton = document.querySelector<SVGTextPathElement>("#up-button")!;
 	readonly downButton = document.querySelector<SVGTextPathElement>("#down-button")!;
 	readonly floorButton = document.querySelector<SVGGElement>("#display")!;
@@ -20,6 +21,7 @@ export class Main2D extends Elevator {
 	readonly yesSmooth = document.querySelector<SVGPathElement>("#yes-smooth")!;
 	readonly noSmooth = document.querySelector<SVGPathElement>("#no-smooth")!;
 	readonly threeDimension = document.querySelector<SVGGElement>("#three-dim")!;
+	readonly stamp = document.querySelector<SVGGElement>("#stamp")!;
 
 	moving = 0; // 1 means up, -1 means down, 0 means not moving
 	state = 0; // 0 inside, 1 opening, 2 zooming, 3 htmling, 4 backing, 5 stay, 6 closing

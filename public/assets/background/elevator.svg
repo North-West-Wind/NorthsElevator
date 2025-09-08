@@ -173,13 +173,13 @@
          x="415.63947"
          y="140.3418"
          id="text1"><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'YosterIsland';-inkscape-font-specification:'YosterIsland'"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Yoster Island';-inkscape-font-specification:'Yoster Island'"
            id="tspan1">   </tspan><tspan
            id="floor"
            x="415.63947"
            y="140.3418"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20px;font-family:'YosterIsland';-inkscape-font-specification:'YosterIsland';fill:#ff0000">G</tspan><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'YosterIsland';-inkscape-font-specification:'YosterIsland'"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20px;font-family:'Yoster Island';-inkscape-font-specification:'Yoster Island';fill:#ff0000">G</tspan><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Yoster Island';-inkscape-font-specification:'Yoster Island'"
            id="tspan2"> </tspan></text>
     </g>
     <g
@@ -438,6 +438,56 @@
          id="rect27"
          style="fill:none;fill-opacity:1;stroke:#f79444;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;paint-order:fill markers stroke"
          d="m 399.00038,49.598312 -7.45507,7.455078 h -10.54493 v 10.542969 l -7.45703,7.457031 7.45703,7.457031 V 93.05339 h 10.54297 l 7.45703,7.45703 7.45704,-7.45703 h 10.54296 V 82.508468 l 7.45508,-7.455078 -7.45508,-7.455078 V 57.05339 h -10.54492 z" />
+    </g>
+    <g
+       id="stamp"
+       transform="matrix(0.72413793,0,0,0.72413793,119.76962,81.322339)"
+       class="elevator-button">
+      <path
+         id="rect28"
+         style="fill:#865536;stroke-width:8;stroke-linecap:round;paint-order:markers stroke fill"
+         d="m 447.46094,204.10027 h 20 v 6 h -20 z" />
+      <path
+         id="path27"
+         style="fill:#9afffd;fill-opacity:0.512584;stroke-width:8;stroke-linecap:round;paint-order:markers stroke fill"
+         d="m 461.461,203.1007 v 6 l 7,2 v -6 z" />
+      <path
+         id="rect16"
+         style="fill:#865536;stroke-width:8;stroke-linecap:round;paint-order:markers stroke fill"
+         d="m 441.461,202.1007 h 20 l 5.99994,1.99957 v 6 h -20 z" />
+      <path
+         id="rect17"
+         style="fill:#7a4d32;fill-opacity:1;stroke-width:8;stroke-linecap:round;paint-order:markers stroke fill"
+         d="M 447.46094,204.10027 441.461,202.1007 v 6 l 5.99994,1.99957 z" />
+      <path
+         id="rect18"
+         style="fill:#a06741;fill-opacity:1;stroke-width:8;stroke-linecap:round;paint-order:markers stroke fill"
+         d="m 447.46094,204.10027 h 20 L 461.461,202.1007 h -20 z" />
+      <rect
+         style="display:inline;fill:#b19048;fill-opacity:1;stroke:none;stroke-width:8;stroke-linecap:round;paint-order:markers stroke fill"
+         id="rect19"
+         width="8"
+         height="16"
+         x="450.46097"
+         y="186.10069" />
+      <ellipse
+         style="display:inline;fill:#b19048;fill-opacity:1;stroke:none;stroke-width:8;stroke-linecap:round;paint-order:markers stroke fill"
+         id="path19"
+         cx="454.46097"
+         cy="202.10069"
+         rx="4"
+         ry="1.5" />
+      <ellipse
+         style="display:inline;fill:#b19048;fill-opacity:1;stroke:none;stroke-width:8;stroke-linecap:round;paint-order:markers stroke fill"
+         id="ellipse19"
+         cx="454.46097"
+         cy="186.10069"
+         rx="4"
+         ry="1.5" />
+      <path
+         id="path26"
+         style="fill:#9afffd;fill-opacity:0.512584;stroke-width:8;stroke-linecap:round;paint-order:markers stroke fill"
+         d="m 447.46094,205.1007 -7.99994,-3 v 6 l 7.99994,3 H 468.461 v -6 z" />
     </g>
   </g>
 </svg>

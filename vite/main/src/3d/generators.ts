@@ -294,7 +294,27 @@ function makeRightButtons(scene: THREE.Scene): LiftObjects {
 	twoDimension.add(layer1, layer2, square, stroke);
 	scene.add(smoothScroll, twoDimension);
 
-	return { smoothScroll, twoDimension };
+	const stampGlassGeometry = new THREE.BoxGeometry(3, 1.5, 3);
+	const stampGlassMaterial = new THREE.MeshStandardMaterial({ color: 0xc9eff1, opacity: 0.5, transparent: true });
+	const stampGlass = new THREE.Mesh(stampGlassGeometry, stampGlassMaterial);
+
+	const stampBaseGeometry = new THREE.BoxGeometry(2.5, 1.5, 2.5);
+	const stampBaseMaterial = new THREE.MeshStandardMaterial({ color: 0x865536 });
+	const stampBase = new THREE.Mesh(stampBaseGeometry, stampBaseMaterial);
+
+	const stampStickGeometry = new THREE.CylinderGeometry(0.4, 0.4, 3);
+	const stampStickMaterial = new THREE.MeshStandardMaterial({ color: 0xd29934 });
+	const stampStick = new THREE.Mesh(stampStickGeometry, stampStickMaterial);
+
+	stampGlass.position.set(39.5, -14, -47.25);
+	stampBase.position.set(39.5, -13.5, -47.25);
+	stampStick.position.set(39.5, -11.5, -47.25);
+
+	const stamp = new THREE.Group();
+	stamp.add(stampGlass, stampBase, stampStick);
+	scene.add(stamp);
+
+	return { smoothScroll, twoDimension, stamp };
 }
 
 export function displayTexture(floor: string | number | null) {

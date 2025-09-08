@@ -1,4 +1,4 @@
-import { getConfig, isMusic, isSmoothScroll, toggleMusic, toggleSmoothScroll, wait, writeConfig } from '../helpers/control';
+import { getConfig, isMusic, isSmoothScroll, openStamper, toggleMusic, toggleSmoothScroll, wait, writeConfig } from '../helpers/control';
 import { disableStylesheet, enableStylesheet } from '../helpers/css';
 import { clamp } from '../helpers/math';
 import { Main2D } from './main2d';
@@ -78,6 +78,9 @@ export function setupHandlers(main2d: Main2D) {
 		main2d.toggleContent(undefined, ()  => main2d.contentByNum(1001));
 	};
 
+	otherButtonSetup(main2d.stamp);
+	main2d.stamp.onclick = () => openStamper();
+
 	const smoothScrollStyle = (enabled: boolean) => {
 		if (enabled) {
 			main2d.yesSmooth.style.stroke = "#ffffff";
@@ -145,7 +148,7 @@ export function setupHandlers(main2d: Main2D) {
 	  }
 	  // click-starter
 	  if (clickOnButton) clickOnButton = false;
-	  else if (touch.x == touch.ix && (main2d.state == 0 || main2d.state == 5) && main2d.info.classList.contains("hidden")) main2d.anyToThree();
+	  else if (touch.x == touch.ix && (main2d.state == 0 || main2d.state == 5) && main2d.info.classList.contains("hidden") && main2d.stampDiv.hasAttribute("ws-disabled")) main2d.anyToThree();
 	}
 	window.onmouseup = () => {
 	  if (touchCheck()) {
@@ -154,7 +157,7 @@ export function setupHandlers(main2d: Main2D) {
 	  }
 	  // click-starter
 	  if (clickOnButton) clickOnButton = false;
-	  else if (touch.x == touch.ix && (main2d.state == 0 || main2d.state == 5) && main2d.info.classList.contains("hidden")) main2d.anyToThree();
+	  else if (touch.x == touch.ix && (main2d.state == 0 || main2d.state == 5) && main2d.info.classList.contains("hidden") && main2d.stampDiv.hasAttribute("ws-disabled")) main2d.anyToThree();
 	}
 	const translateBackground = () => {
 	  const offset = clamp((touch.x - touch.ix) * 100 / window.innerWidth + touch.offset, -maxTrans, maxTrans);

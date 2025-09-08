@@ -72,3 +72,8 @@ export function toggleSmoothScroll() {
 export async function wait(ms: number) {
 	await new Promise(res => setTimeout(res, ms));
 }
+
+export async function openStamper() {
+	const div = document.querySelector("div[web-stamp]");
+	div?.removeAttribute("ws-disabled");
+}

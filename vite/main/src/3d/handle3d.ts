@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { Main3D } from "./main3d";
 import { displayTexture } from "./generators";
-import { getConfig, toggleMusic, toggleSmoothScroll, wait } from "../helpers/control";
+import { getConfig, openStamper, toggleMusic, toggleSmoothScroll, wait } from "../helpers/control";
 import { clamp } from "../helpers/math";
 import Elevator from "../main";
 import Floor from "../types/floor";
@@ -15,7 +15,7 @@ enum State {
 };
 
 export function setupHandlers(main3d: Main3D) {
-	const { buttonU, buttonD, doorL, doorR, display, sign, music, light, donation, suggestion, smoothScroll, twoDimension } = main3d.objects;
+	const { buttonU, buttonD, doorL, doorR, display, sign, music, light, donation, suggestion, smoothScroll, twoDimension, stamp } = main3d.objects;
 
 	// various variables
 	let state = State.INSIDE;
@@ -47,7 +47,7 @@ export function setupHandlers(main3d: Main3D) {
 			newSeparation = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
 			x = (e.touches[0].clientX + e.touches[1].clientX) / 2;
 			y = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-			if (newSeparation && div.classList.contains("hidden")) {
+			if (newSeparation && main3d.info.classList.contains("hidden")) {
 				scrollDisplacement += (newSeparation - separation) * 5;
 				separation = newSeparation;
 			}
@@ -59,7 +59,7 @@ export function setupHandlers(main3d: Main3D) {
 			x: offsets.x + (x - touch.ix) / Math.max(window.innerWidth, window.innerHeight),
 			y: offsets.y + (y - touch.iy) / Math.max(window.innerWidth, window.innerHeight),
 		};
-		if (div.classList.contains("hidden")) {
+		if (main3d.info.classList.contains("hidden")) {
 			let noMove = false;
 			if (main3d.ratio > 1) noMove = Math.abs(newOffsets.x) > window.innerWidth / 16 || Math.abs(newOffsets.y) > window.innerHeight / 12;
 			else if (main3d.ratio < 1) noMove = Math.abs(newOffsets.y) > window.innerHeight / 16 || Math.abs(newOffsets.x) > window.innerWidth / 12;
@@ -121,7 +121,7 @@ export function setupHandlers(main3d: Main3D) {
 		const mouse2D = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
 		const raycaster = new THREE.Raycaster();
 		raycaster.setFromCamera(mouse2D, main3d.camera);
-		const check: THREE.Object3D[] = [buttonU, buttonD, display, sign, music, light, donation, suggestion, smoothScroll, twoDimension];
+		const check: THREE.Object3D[] = [buttonU, buttonD, display, sign, music, light, donation, suggestion, smoothScroll, twoDimension, stamp];
 		if (main3d.floor?.listenMove) check.push(...main3d.floor.moveCheck());
 		const intersect = raycaster.intersectObjects(check);
 		if (intersect.length > 0) document.body.style.cursor = "pointer";
@@ -135,7 +135,7 @@ export function setupHandlers(main3d: Main3D) {
 	});
 
 	function clickEventsCommon(e: { clientX: number, clientY: number }) {
-		if (!div.classList.contains("hidden")) return;
+		if (!main3d.info.classList.contains("hidden") || !main3d.stampDiv.hasAttribute("ws-disabled")) return;
 		const mouse2D = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
 		const raycaster = new THREE.Raycaster();
 		raycaster.setFromCamera(mouse2D, main3d.camera);
@@ -172,6 +172,8 @@ export function setupHandlers(main3d: Main3D) {
 			}
 		} else if (raycaster.intersectObject(twoDimension).length > 0) {
 			window.location.href = window.location.pathname + (window.location.search ? window.location.search + "&flat" : "?flat");
+		} else if (raycaster.intersectObject(stamp).length > 0) {
+			openStamper();
 		} else if (main3d.floor?.listenClick) {
 			main3d.floor.clickRaycast(raycaster);
 			start = true;
@@ -197,11 +199,11 @@ export function setupHandlers(main3d: Main3D) {
 	}
 
 	window.addEventListener("wheel", e => {
-		if (div.classList.contains("hidden")) scrollDisplacement += e.deltaY;
+		if (main3d.info.classList.contains("hidden")) scrollDisplacement += e.deltaY;
 	});
 
 	window.addEventListener("keydown", e => {
-		if (e.key == "Escape" && !div.classList.contains("hidden"))
+		if (e.key == "Escape" && !main3d.info.classList.contains("hidden"))
 			main3d.toggleContent(main3d.floor);
 	});
 
@@ -305,7 +307,7 @@ export function setupHandlers(main3d: Main3D) {
 	}, 10);
 
 	window.onpopstate = async () => {
-		if (!div.classList.contains("hidden")) main3d.toggleContent(main3d.floor);
+		if (!main3d.info.classList.contains("hidden")) main3d.toggleContent(main3d.floor);
 		await wait(250);
 		if (main3d.camera.position.x != 0 || main3d.camera.position.z != 0) {
 			scrollDisplacement = -10000;
@@ -316,14 +318,13 @@ export function setupHandlers(main3d: Main3D) {
 		poppedState = true;
 	};
 
-	const div = document.getElementById("info")!;
-	div.addEventListener("wheel", () => {
+	main3d.info.addEventListener("wheel", () => {
 		scrollDisplacement = scrollVelocity = 0;
 	});
 
 	function handleWheel(scroll: number) {
 		scroll = scroll / 10;
-		if (!div.classList.contains('hidden')) return;
+		if (!main3d.info.classList.contains('hidden')) return;
 		if (main3d.floor.handleWheel(scroll)) {
 			scrollDisplacement = 0;
 			scrollVelocity = 0;
