@@ -130,8 +130,10 @@ export default async function init2D() {
 				elevatorSvg = elevatorSvg.replace(svgTag[0], svgTag[0].replace(/(\n)?\s*(width|height)=("|')\d+(\.\d+)?("|')/g, ""));
 
 			elevatorDiv.innerHTML = elevatorSvg;
-			document.body.insertBefore(bgDiv, canvas.nextSibling);
-			document.body.insertBefore(elevatorDiv, bgDiv.nextSibling);
+			const movable = canvas.parentElement as HTMLDivElement;
+			movable.style.position = "initial";
+			movable.insertBefore(bgDiv, canvas.nextSibling);
+			movable.insertBefore(elevatorDiv, bgDiv.nextSibling);
 			canvas.remove();
 
 			const main2d = new Main2D();

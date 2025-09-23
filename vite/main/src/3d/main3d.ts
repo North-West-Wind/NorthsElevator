@@ -61,6 +61,18 @@ export class Main3D extends Elevator {
 		this.animate();
 
 		setupHandlers(this);
+
+		// Funny peek
+		if (window.location.pathname == "/d") {
+			window.addEventListener("click", () => {
+				setTimeout(() => {
+					const vid = document.getElementById("peek") as HTMLVideoElement;
+					vid.style.display = "block";
+					vid.onended = () => vid.remove();
+					vid.play();
+				}, 1000);
+			}, { once: true });
+		}
 	}
 
 	protected dynamicLoad() {

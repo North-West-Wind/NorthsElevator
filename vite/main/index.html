@@ -19,9 +19,12 @@
         <source src="/assets/sounds/bg.ogg" type="audio/ogg">
         <source src="/assets/sounds/bg.mp3" type="audio/mp3">
     </audio>
-    <canvas id="bg"></canvas>
-    <div id="info" class="info hidescroll hidden visuallyhidden"></div>
-    <div id="closer" class="hidden visuallyhidden">×</div>
+		<div id="movable">
+	    <canvas id="bg"></canvas>
+	    <div id="info" class="info hidescroll hidden visuallyhidden"></div>
+	    <div id="closer" class="hidden visuallyhidden">×</div>
+			<video id="peek" preload="none" src="/assets/peek.webm"></video>
+		</div>
 		<div web-stamp ws-src="/assets/images/stamp.svg" ws-disabled></div>
     <script type="module" src="src/bootstrap.ts"></script>
 		<script src="https://cdn.jsdelivr.net/npm/web-stamp@1.0.3/dist/web-stamp.min.js"></script>

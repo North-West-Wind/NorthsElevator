@@ -53,7 +53,9 @@ export default abstract class Elevator {
 			if (!this.infoDiv.classList.contains('hidden')) this.toggleContent();
 		}
 
-		this.passedInFloor = ((Array.from(this.floors.keys()).indexOf(window.location.pathname.split("/")[1] || "ground") + 1) || (404 + 1)) - 1;
+		let key = window.location.pathname.split("/")[1];
+		if (key == "d") key = "ground";
+		this.passedInFloor = ((Array.from(this.floors.keys()).indexOf(key || "ground") + 1) || (404 + 1)) - 1;
 		this.currentFloor = this.targetFloor = this.passedInFloor;
 		this.floor = this.realOrNotFoundFloor(this.targetFloor);
 		// There should be no need to reset instance
