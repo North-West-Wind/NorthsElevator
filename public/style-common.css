@@ -29,8 +29,9 @@ body {
 }
 
 #peek {
-	display: none;
 	width: 100vw;
+	height: 0;
+	transition: height .5s ease-in;
 }
 
 canvas {

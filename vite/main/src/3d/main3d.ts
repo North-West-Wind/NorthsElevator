@@ -67,7 +67,12 @@ export class Main3D extends Elevator {
 			window.addEventListener("click", () => {
 				setTimeout(() => {
 					const vid = document.getElementById("peek") as HTMLVideoElement;
-					vid.style.display = "block";
+					vid.onplay = () => {
+						// Even though the webm itself is dyanmic size, the browser uses that extremely laggily
+						// So I'm programming part of the starting animation
+						vid.style.height = "calc(100vw * 846 / 1920)";
+						setTimeout(() => vid.style.height = "unset", 3000);
+					};
 					vid.onended = () => vid.remove();
 					vid.play();
 				}, 1000);
