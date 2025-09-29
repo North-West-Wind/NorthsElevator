@@ -183,8 +183,26 @@ function makeLeftButtons(scene: THREE.Scene): LiftObjects {
 	speaker.position.set(-37.5, 20.5, -50);
 	speaker.setRotationFromAxisAngle(new THREE.Vector3(1, 0, 0), 0.1);
 
+	const ballCanvas = new OffscreenCanvas(400, 400);
+	const ballCtx = ballCanvas.getContext("2d")!;
+	const segments = 50;
+	ballCtx.fillStyle = "#c6bfa9";
+	ballCtx.fillRect(0, 0, ballCanvas.width, ballCanvas.height);
+	ballCtx.translate(ballCanvas.width / 2, ballCanvas.height / 2);
+	ballCtx.rotate(Math.PI * 0.25);
+	ballCtx.translate(-ballCanvas.width / 2, -ballCanvas.height / 2);
+	ballCtx.fillStyle = "#9e9885";
+	for (let ii = 0; ii < segments; ii++) {
+		ballCtx.fillRect(ii * ballCanvas.width / segments, 0, ballCanvas.width / (segments * 2), ballCanvas.height);
+		ballCtx.fillRect(0, ii * ballCanvas.height / segments, ballCanvas.width, ballCanvas.height / (segments * 2));
+	}
+
+	const ballTexture = new THREE.CanvasTexture(ballCanvas);
+	ballTexture.generateMipmaps = false;
+	ballTexture.minFilter = THREE.LinearFilter;
+
 	const ballGeometry = new THREE.SphereGeometry(4);
-	const ballMaterial = new THREE.MeshStandardMaterial({ color: 0xc6bfa9 });
+	const ballMaterial = new THREE.MeshStandardMaterial({ map: ballTexture });
 	const ball = new THREE.Mesh(ballGeometry, ballMaterial);
 	ball.position.set(-37.5, 20.5, -48);
 
@@ -317,7 +335,7 @@ function makeRightButtons(scene: THREE.Scene): LiftObjects {
 	return { smoothScroll, twoDimension, stamp };
 }
 
-export function displayTexture(floor: string | number | null) {
+export function displayTexture(floor: boolean | number | null) {
 	const x = new OffscreenCanvas(400, 400);
 	var xc = x.getContext("2d")!;
 	xc.fillStyle = "#555555";
@@ -328,8 +346,17 @@ export function displayTexture(floor: string | number | null) {
 	xc.font = "256px 'YosterIsland'";
 	xc.textAlign = "center";
 	xc.textBaseline = "middle";
-	if (floor !== 0 && !floor) xc.fillText("?", x.width / 2, x.height / 2);
-	else if (typeof floor == "string") xc.fillText(floor, x.width / 2, x.height / 2);
+	if (typeof floor == "boolean") {
+		// true = up, false = down
+		xc.translate(200, 200);
+		if (!floor) xc.rotate(Math.PI);
+		xc.beginPath();
+		xc.moveTo(0, -100);
+		xc.lineTo(110.85, 92);
+		xc.lineTo(-110.85, 92);
+		xc.fill();
+		xc.resetTransform();
+	} else if (floor !== 0 && !floor) xc.fillText("?", x.width / 2, x.height / 2);
 	else xc.fillText(floor <= 0 ? "G" : floor.toString(), x.width / 2, x.height / 2);
 	const texture = new THREE.CanvasTexture(x);
 	texture.generateMipmaps = false;

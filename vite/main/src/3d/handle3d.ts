@@ -213,10 +213,7 @@ export function setupHandlers(main3d: Main3D) {
 			if (state == State.OUTSIDE) state = State.CLOSING;
 			displayPressed = false;
 			diff = main3d.targetFloor - main3d.currentFloor;
-			var symbol;
-			if (diff > 0) symbol = "▲";
-			else symbol = "▼";
-			const xm = new THREE.MeshStandardMaterial({ map: displayTexture(symbol), transparent: true });
+			const xm = new THREE.MeshStandardMaterial({ map: displayTexture(diff > 0), transparent: true });
 			xm.map!.needsUpdate = true;
 			display.material.splice(4, 1, xm);
 			main3d.started = true;

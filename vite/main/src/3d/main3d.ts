@@ -11,7 +11,7 @@ export class Main3D extends Elevator {
 	scene = new THREE.Scene();
 	pointLight = new THREE.PointLight(0xfff8be, 450, 300, 1.2);
 	objects = makeLift(this.scene, this.passedInFloor);
-	camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+	camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
 	private renderer = new THREE.WebGLRenderer({ canvas: document.querySelector(`#bg`)! });
 	private controls?: FirstPersonControls;
 	private clock?: THREE.Clock;
