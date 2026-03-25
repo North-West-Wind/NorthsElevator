@@ -1,27 +1,10 @@
-.conversation-level {
-	display: flex;
-	flex-direction: column;
-	margin: 0 1vmax;
-}
-
-.conversation-layer {
-	display: flex;
-}
-
-.conversation-cell {
-	font-size: 1vmax;
-	padding: 1vmax;
-	white-space: nowrap;
-	margin: 1vmax 0;
-	transition: border ease .25s;
-}
-
-.conversation-cell.exist {
-	opacity: 0.5;
-}
-
-.conversation-cell.real:hover {
-	cursor: pointer;
+canvas {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100vw;
+	height: 100vw;
+	z-index: -1;
 }
 
 .preview {
@@ -32,7 +15,7 @@
 	left: 0;
 	width: 100vw;
 	display: flex;
-	max-height: 20vh;
+	max-height: 40vh;
 	overflow: scroll;
 }
 

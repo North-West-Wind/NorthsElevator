@@ -1,14 +1,50 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import './app.css'
 import { Summatia, SummatiaConversationBranch, SummatiaConversationLinear } from './types/summatia';
-import { JSX } from 'preact/jsx-runtime';
-import { randomDarkHSV } from './helpers/color';
+import { randomRGB } from './helpers/color';
 import Preview from './components/preview';
+import { Bodies, Body, Composite, Constraint, Engine, Events, Mouse, MouseConstraint, Render, Runner } from "matter-js";
+
+const engine = Engine.create({ gravity: { scale: 0 } });
+const render = Render.create({
+	element: document.body,
+	engine,
+});
+
+render.options.wireframes = false;
+Render.run(render);
+const runner = Runner.create();
+Runner.run(runner, engine);
+
+const mouse = Mouse.create(render.canvas);
+const mouseConstraint = MouseConstraint.create(engine, {
+	mouse,
+	constraint: {
+		stiffness: 0.2,
+		render: { visible: false }
+	}
+});
+
+Composite.add(engine.world, mouseConstraint);
+render.mouse = mouse;
+
+const onResize = () => {
+	Render.lookAt(render, [{
+		min: { x: -window.innerWidth / 2, y: -window.innerHeight / 2 },
+		max: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+	}]);
+	render.options.width = window.innerWidth;
+	render.options.height = window.innerHeight;
+	render.canvas.width = window.innerWidth;
+	render.canvas.height = window.innerHeight;
+  Render.setPixelRatio(render, window.devicePixelRatio);
+	render.mouse.pixelRatio = render.options.pixelRatio!;
+};
+onResize();
 
 export function App() {
 	const cell = useRef<HTMLDivElement>(null);
   const [id, setId] = useState(window.location.hash.slice(1));
-	const [clicked, setClicked] = useState("");
   const [data, setData] = useState<Summatia | undefined>();
 
 	const save = () => {
@@ -43,7 +79,6 @@ export function App() {
 
 		window.onpopstate = (ev) => {
 			setId(ev.state.id || "");
-			setClicked(ev.state.id || "");
 		};
 
 		const onKeyDown = (ev: KeyboardEvent) => {
@@ -63,126 +98,158 @@ export function App() {
 			}
 		};
 		window.addEventListener("keydown", onKeyDown);
-		return () => window.removeEventListener("keydown", onKeyDown);
+		window.addEventListener("resize", onResize);
+		return () => {
+			window.removeEventListener("keydown", onKeyDown);
+			window.removeEventListener("resize", onResize);
+		}
   }, []);
 
   if (!data) return <></>;
 
-	const [collapsed, setCollapsed] = useState(new Set<string>());
-	const [children, setChildren] = useState<JSX.Element[]>([]);
-	const [cacheColorMap, setCacheColorMap] = useState(new Map<string, [string, string]>());
-
 	useEffect(() => {
-		const ch = [];
+		let entries = 0;
+		let currentColor = randomRGB();
+		const bodies = new Map<string, Body>();
 
-		const drawn = new Set<string>();
-		const layerMap = new Map<string, number>();
-		const levelMap = new Map<string, number>();
-		const colorMap = new Map<string, [string, string]>();
-		const cacheMap = new Map(cacheColorMap);
-	
-		let levels: ({ key: string, looped: boolean, color: [string, string] } | undefined)[][];
+		const wait = (ms: number) => new Promise(res => setTimeout(res, ms));
 	
 		// recursive DFS
-		const processKey: (key: string, parent?: string) => number = (key: string, parent?: string) => {
-			const colorKey = key + (parent ? "|" + parent : "");
-			const layer = layerMap.get(key)!;
-			const level = levelMap.get(key)!;
-			const directlyUseColor = cacheColorMap.has(colorKey);
-			const color = cacheColorMap.get(colorKey) || colorMap.get(colorKey)!;
+		const processKey = async (key: string, parent?: string) => {
 			const conversation = data.conversation.get(key);
+			if (!conversation) return;
 
-			if (!conversation) return 1;
-
-			if (!directlyUseColor) cacheMap.set(colorKey, color);
-	
-			if (!levels[level]) levels[level] = [];
-			while (levels[level].length < layer)
-				levels[level].push(undefined);
-			//if (levels[level].length < layer) levels[level].push(...Array(levels[level].length - layer).fill(undefined));
-			if (drawn.has(key)) {
-				levels[level][layer] = { key, looped: true, color };
-				return 1;
-			}
-			levels[level][layer] = { key, looped: false, color };
-			if (collapsed.has(key)) return 1;
-	
-			drawn.add(key);
-	
-			if ((conversation as any).next) {
-				const lin = conversation as SummatiaConversationLinear;
-				layerMap.set(lin.next, layer);
-				levelMap.set(lin.next, level + 1);
-				colorMap.set(`${lin.next}|${key}`, [color[1], color[1]]);
-				return processKey(lin.next, key);
-			} else if ((conversation as any).responses) {
-				const bra = conversation as SummatiaConversationBranch;
-				let span = 0;
-				for (let ii = 0; ii < bra.responses.length; ii++) {
-					const res = bra.responses[ii];
-					layerMap.set(res.next, layer + span);
-					levelMap.set(res.next, level + 1);
-					colorMap.set(`${res.next}|${key}`, directlyUseColor ? color : [color[1], randomDarkHSV()]);
-					span += processKey(res.next, key);
+			if (bodies.has(key)) {
+				if (parent) {
+					const constraint = Constraint.create({
+						bodyA: bodies.get(parent),
+						bodyB: bodies.get(key),
+						stiffness: 0.01,
+						length: 40,
+						render: {
+							strokeStyle: "#ffffff3f",
+							anchors: false,
+							type: "line"
+						}
+					});
+					Composite.add(engine.world, constraint);
 				}
-				return span;
+				return;
 			}
-			return 1;
-		};
-	
-		for (const entry of data.entryPoints) {
-			levels = [];
-			layerMap.set(entry, 0);
-			levelMap.set(entry, 0);
-			const color = randomDarkHSV();
-			colorMap.set(entry, [color, color]);
-			processKey(entry);
-	
-			// create elements from levels
-			const levelsHTML = levels.map((level, ii) => {
-				const cells = level.map((node, jj) => {
-					if (node) return <div
-							className={"conversation-cell real" + (node.looped ? " exist" : "") + (node.key == clicked ? " selected" : "")}
-							key={node.key + jj}
-							style={node.key == clicked ? { background: "#fff", color: "#000" } : { background: `linear-gradient(to right, ${node.color[0]}, ${node.color[1]})` }}
-							onClick={ev => {
-								if (ev.button == 0) {
-									if (clicked == node.key) setClicked("");
-									else {
-										setClicked(node.key);
-										setId(node.key);
-										window.history.pushState({ id: node.key }, "", `#${node.key}`);
-									}
-								}
-							}}
-							onMouseEnter={() => {
-								if (!clicked)
-									setId(node.key);
-							}}
-							onContextMenu={ev => {
-								ev.preventDefault();
-								const set = new Set(collapsed);
-								if (set.has(node.key)) set.delete(node.key);
-								else set.add(node.key);
-								setCollapsed(set);
-							}}
-							ref={node.key == clicked ? cell : undefined}
-						>{collapsed.has(node.key) ? (node.key.slice(0, 8) + "...") : node.key}</div>;
-					else return <div className="conversation-cell" key={jj} dangerouslySetInnerHTML={{ __html: "&nbsp;" }}></div>;
+
+			if (!parent) {
+				const circle = Bodies.circle(200 * entries++, 0, 10, { isStatic: true, render: {
+					fillStyle: "#fff",
+					strokeStyle: "#777",
+					lineWidth: 2,
+					visible: true,
+					opacity: 1
+				}});
+				// @ts-ignore: extra info
+				circle.conversation = key;
+				bodies.set(key, circle);
+				Composite.add(engine.world, circle);
+			} else {
+				const circle = Bodies.circle(0, bodies.get(parent)!.position.y + 50, 10, { render: {
+					fillStyle: currentColor,
+					lineWidth: 0,
+					visible: true,
+					opacity: 1
+				}});
+				// @ts-ignore: extra info
+				circle.conversation = key;
+
+				const constraint = Constraint.create({
+					bodyA: bodies.get(parent),
+					bodyB: circle,
+					stiffness: 0.01,
+					length: 40,
+					render: {
+						strokeStyle: "#ffffff7f",
+						anchors: false,
+						type: "line"	
+					}
 				});
-				return <div className="conversation-level" key={ii}>{cells}</div>;
+				bodies.set(key, circle);
+				Composite.add(engine.world, [circle, constraint]);
+			}
+
+			if ((conversation as any).next) {
+				await wait(10);
+				await processKey((conversation as SummatiaConversationLinear).next, key);
+			} else if ((conversation as any).responses) {
+				const branch = conversation as SummatiaConversationBranch;
+				for (let ii = 0; ii < branch.responses.length; ii++) {
+					currentColor = randomRGB();
+					const res = branch.responses[ii];
+					await wait(10);
+					await processKey(res.next, key);
+				}
+			}
+		};
+
+		(async () => {
+			for (const entry of data.entryPoints) {
+				currentColor = randomRGB();
+				await processKey(entry);
+			}
+
+			engine.world.bodies = engine.world.bodies.sort((a, b) => b.collisionFilter.category! - a.collisionFilter.category!);
+
+			Events.on(engine, "beforeUpdate", () => {
+				const arr = Array.from(bodies.values());
+				arr.forEach((bodyA, ii) => {
+					arr.forEach((bodyB, jj) => {
+						if (ii == jj) return;
+						const deltaX = bodyA.position.x - bodyB.position.x;
+						const deltaY = bodyA.position.y - bodyB.position.y;
+						const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+						const magnitude = 1 / (distance * distance);
+						const directionX = deltaX / distance;
+						const directionY = deltaY / distance;
+						
+						Body.applyForce(bodyA, bodyA.position, {
+							x: directionX * magnitude,
+							y: directionY * magnitude
+						});
+						
+						Body.applyForce(bodyB, bodyB.position, {
+							x: -directionX * magnitude,
+							y: -directionY * magnitude
+						});
+					});
+				});
 			});
-			ch.push(<div className="conversation-layer">{levelsHTML}</div>);
-		}
-		setChildren(ch);
-		setCacheColorMap(cacheMap);
-	}, [collapsed, clicked]);
+
+			Events.on(mouseConstraint, "startdrag", (ev) => {
+				const body = ev.source.body;
+				if (!body) return;
+				// @ts-ignore: extra key
+				const key = body.conversation as string;
+				console.log(key);
+				if (!key) return;
+				setId(key);
+			});
+		})();
+
+	}, []);
+
+	useEffect(() => {
+		const onWheel = (ev: WheelEvent) => {
+			render.bounds.min.x += ev.deltaX;
+			render.bounds.max.x += ev.deltaX;
+			render.bounds.min.y += ev.deltaY;
+			render.bounds.max.y += ev.deltaY;
+			Render.lookAt(render, [render.bounds]);
+		};
+
+		window.addEventListener("wheel", onWheel);
+		return () => window.removeEventListener("wheel", onWheel);
+	}, []);
 
   return <>
-		{children}
-		{id && <div className="preview-offset"></div>}
 		{id && <Preview data={data} entry={id} next={next => {
-			setClicked(next);
 			setId(next);
 		}} scroll={() => cell.current?.scrollIntoView()} renameEntry={name => {
 			data.conversation.set(name, data.conversation.get(id)!);

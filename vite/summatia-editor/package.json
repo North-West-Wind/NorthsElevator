@@ -9,10 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "matter-js": "^0.20.0",
     "preact": "^10.26.2"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.1",
+    "@types/matter-js": "^0.20.2",
     "typescript": "~5.7.2",
     "vite": "^6.2.0"
   }

@@ -1,3 +1,4 @@
-export function randomDarkHSV() {
-	return `hsl(${Math.floor(Math.random() * 360)}, ${Math.round(Math.random() * 100)}%, ${Math.round(Math.random() * 50)}%)`;
+export function randomRGB() {
+	const hex = () => Math.floor(Math.random() * 256).toString(16).padStart(2, "0");
+	return `#${hex()}${hex()}${hex()}`;
 }
