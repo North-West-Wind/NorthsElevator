@@ -7,7 +7,7 @@ canvas {
 	z-index: -1;
 }
 
-.preview {
+#preview {
 	padding: 1vmax;
 	background-color: #120d35;
 	position: fixed;
@@ -23,7 +23,7 @@ canvas {
 	height: 50vh;
 }
 
-.preview-text {
+#preview-text {
 	padding: 1vmax;
 	overflow: scroll;
 }
@@ -44,7 +44,7 @@ canvas {
 	cursor: pointer;
 }
 
-.preview-modify {
+#preview-modify {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -103,28 +103,28 @@ canvas {
 	background-color: #47a300;
 }
 
-.restaurant {
+#restaurant {
 	max-height: 100%;
 	display: flex;
 	margin: 0;
 	position: relative;
 }
 
-.restaurant img {
+#restaurant img {
 	border: .25vmax solid #524c7b;
 	border-radius: 1vmax;
 }
 
-.restaurant .emotion-edit {
+#restaurant #emotion-edit {
 	padding: 1vmax;
 	overflow: scroll;
 }
 
-.restaurant .emotion-edit input:hover {
+#restaurant #emotion-edit input:hover {
 	cursor: pointer;
 }
 
-.restaurant .emotion-edit label:hover {
+#restaurant #emotion-edit label:hover {
 	cursor: pointer;
 	filter: brightness(80%);
 }

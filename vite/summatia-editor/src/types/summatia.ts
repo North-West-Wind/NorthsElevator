@@ -25,6 +25,23 @@ export type SummatiaData =
 	Record<string, SummatiaConversationEither<false>>
 
 export class Summatia {
+	private static instance: Summatia;
+
+	static get hasInstance() {
+		return !!this.instance;
+	}
+
+	static async getInstance() {
+		if (this.instance) return this.instance;
+		const localData = window.localStorage.getItem("summatia-editor");
+		if (localData)
+			return this.instance = new Summatia(JSON.parse(localData));
+		else {
+			const json = await fetch("/data/summatia.json").then(res => res.json());
+			return this.instance = new Summatia(json);
+		}
+	}
+
 	emotionPreset: DoubleMap<string, number>;
 	conversation: Map<string, SummatiaConversationEither<true>>;
 	entryPoints: string[];
