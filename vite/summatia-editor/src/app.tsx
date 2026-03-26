@@ -7,7 +7,7 @@ import { Bodies, Body, Composite, Constraint, Engine, Events, Mouse, MouseConstr
 
 const engine = Engine.create({ gravity: { scale: 0 } });
 const render = Render.create({
-	element: document.body,
+	canvas: document.querySelector("canvas") as HTMLCanvasElement,
 	engine,
 });
 
@@ -29,18 +29,64 @@ Composite.add(engine.world, mouseConstraint);
 render.mouse = mouse;
 
 const onResize = () => {
-	Render.lookAt(render, [{
-		min: { x: -window.innerWidth / 2, y: -window.innerHeight / 2 },
-		max: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
-	}]);
 	render.options.width = window.innerWidth;
 	render.options.height = window.innerHeight;
 	render.canvas.width = window.innerWidth;
 	render.canvas.height = window.innerHeight;
   Render.setPixelRatio(render, window.devicePixelRatio);
 	render.mouse.pixelRatio = render.options.pixelRatio!;
+	Render.lookAt(render, [{
+		min: { x: -window.innerWidth / 2, y: -window.innerHeight / 2 },
+		max: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+	}]);
 };
 onResize();
+
+let entries = 0;
+let currentColor = randomRGB();
+const bodies = new Map<string, Body>();
+const constraintMap = new Map<string, { next: string, constraint: Constraint }[]>();
+
+const addNode = (key: string, isEntry = false) => {
+	const circle = Bodies.circle(0, isEntry ? 200 * entries++ : Math.random() * 100 - 50, 10, { isStatic: isEntry, render: {
+		fillStyle: isEntry ? "#fff" : currentColor,
+		lineWidth: 0,
+		visible: true,
+		opacity: 1
+	}});
+	// @ts-ignore: extra info
+	circle.conversation = key;
+	bodies.set(key, circle);
+	Composite.add(engine.world, circle);
+};
+
+const linkNode = (from: string, to: string) => {
+	const circle = bodies.get(to)!;
+	const constraint = Constraint.create({
+		bodyA: bodies.get(from),
+		bodyB: circle,
+		stiffness: 0.01,
+		length: 40,
+		render: {
+			strokeStyle: "#ffffff7f",
+			anchors: false,
+			type: "line"	
+		}
+	});
+	constraintMap.set(from, (constraintMap.get(from) || []).concat([{ next: to, constraint }]));
+	bodies.set(to, circle);
+	Composite.add(engine.world, constraint);
+};
+
+const unlinkNode = (from: string, to: string) => {
+	const list = constraintMap.get(from);
+	if (!list) return;
+	const index = list.findIndex(({ next }) => next == to);
+	if (index === undefined || index < 0) return;
+	Composite.remove(engine.world, list[index].constraint);
+	list.splice(index, 1);
+	constraintMap.set(from, list);
+};
 
 export function App() {
 	const cell = useRef<HTMLDivElement>(null);
@@ -76,8 +122,8 @@ export function App() {
 				setData(summatia);
 			});
 		}
-
-		window.onpopstate = (ev) => {
+		
+		const onPopState = (ev: PopStateEvent) => {
 			setId(ev.state.id || "");
 		};
 
@@ -97,10 +143,22 @@ export function App() {
 				}
 			}
 		};
+		const onWheel = (ev: WheelEvent) => {
+			render.bounds.min.x += ev.deltaX;
+			render.bounds.max.x += ev.deltaX;
+			render.bounds.min.y += ev.deltaY;
+			render.bounds.max.y += ev.deltaY;
+			Render.lookAt(render, [render.bounds]);
+		};
+
+		window.addEventListener("popstate", onPopState);
 		window.addEventListener("keydown", onKeyDown);
+		window.addEventListener("wheel", onWheel);
 		window.addEventListener("resize", onResize);
 		return () => {
+			window.removeEventListener("popstate", onPopState);
 			window.removeEventListener("keydown", onKeyDown);
+			window.removeEventListener("wheel", onWheel);
 			window.removeEventListener("resize", onResize);
 		}
   }, []);
@@ -108,9 +166,6 @@ export function App() {
   if (!data) return <></>;
 
 	useEffect(() => {
-		let entries = 0;
-		let currentColor = randomRGB();
-		const bodies = new Map<string, Body>();
 
 		const wait = (ms: number) => new Promise(res => setTimeout(res, ms));
 	
@@ -120,59 +175,12 @@ export function App() {
 			if (!conversation) return;
 
 			if (bodies.has(key)) {
-				if (parent) {
-					const constraint = Constraint.create({
-						bodyA: bodies.get(parent),
-						bodyB: bodies.get(key),
-						stiffness: 0.01,
-						length: 40,
-						render: {
-							strokeStyle: "#ffffff3f",
-							anchors: false,
-							type: "line"
-						}
-					});
-					Composite.add(engine.world, constraint);
-				}
+				if (parent) linkNode(parent, key);
 				return;
 			}
 
-			if (!parent) {
-				const circle = Bodies.circle(200 * entries++, 0, 10, { isStatic: true, render: {
-					fillStyle: "#fff",
-					strokeStyle: "#777",
-					lineWidth: 2,
-					visible: true,
-					opacity: 1
-				}});
-				// @ts-ignore: extra info
-				circle.conversation = key;
-				bodies.set(key, circle);
-				Composite.add(engine.world, circle);
-			} else {
-				const circle = Bodies.circle(0, bodies.get(parent)!.position.y + 50, 10, { render: {
-					fillStyle: currentColor,
-					lineWidth: 0,
-					visible: true,
-					opacity: 1
-				}});
-				// @ts-ignore: extra info
-				circle.conversation = key;
-
-				const constraint = Constraint.create({
-					bodyA: bodies.get(parent),
-					bodyB: circle,
-					stiffness: 0.01,
-					length: 40,
-					render: {
-						strokeStyle: "#ffffff7f",
-						anchors: false,
-						type: "line"	
-					}
-				});
-				bodies.set(key, circle);
-				Composite.add(engine.world, [circle, constraint]);
-			}
+			addNode(key, !parent);
+			if (parent) linkNode(parent, key);
 
 			if ((conversation as any).next) {
 				await wait(10);
@@ -235,25 +243,12 @@ export function App() {
 
 	}, []);
 
-	useEffect(() => {
-		const onWheel = (ev: WheelEvent) => {
-			render.bounds.min.x += ev.deltaX;
-			render.bounds.max.x += ev.deltaX;
-			render.bounds.min.y += ev.deltaY;
-			render.bounds.max.y += ev.deltaY;
-			Render.lookAt(render, [render.bounds]);
-		};
-
-		window.addEventListener("wheel", onWheel);
-		return () => window.removeEventListener("wheel", onWheel);
-	}, []);
-
   return <>
 		{id && <Preview data={data} entry={id} next={next => {
 			setId(next);
 		}} scroll={() => cell.current?.scrollIntoView()} renameEntry={name => {
 			data.conversation.set(name, data.conversation.get(id)!);
 			setId(name);
-		}} save={save} download={download}/>}
+		}} save={save} download={download} addNode={addNode} linkNode={linkNode} unlinkNode={unlinkNode} />}
 	</>;
 }

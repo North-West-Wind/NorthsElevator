@@ -3,7 +3,20 @@ import { Summatia, SummatiaConversationBranch, SummatiaConversationEither, Summa
 import Restaurant from "./restaurant";
 import TogglableInput from "./toggle-input";
 
-export default function Preview(props: { data: Summatia, entry: string, renameEntry: (name: string) => void, next: (next: string) => void, scroll: () => void, save: () => void, download: () => void }) {
+type Props = {
+	data: Summatia;
+	entry: string;
+	renameEntry: (name: string) => void;
+	next: (next: string) => void;
+	scroll: () => void;
+	save: () => void;
+	download: () => void;
+	addNode: (key: string) => void;
+	linkNode: (from: string, to: string) => void;
+	unlinkNode: (from: string, to: string) => void;
+};
+
+export default function Preview(props: Props) {
 	const [large, setLarge] = useState(false);
 	const [entry, setEntry] = useState(props.entry);
 	const [conv, setConv] = useState<SummatiaConversationEither<true>>(props.data.conversation.get(props.entry)!);
