@@ -46,9 +46,10 @@ let entries = 0;
 let currentColor = randomRGB();
 const bodies = new Map<string, Body>();
 const constraintMap = new Map<string, { next: string, constraint: Constraint }[]>();
+const parentMap = new Map<string, Set<string>>();
 
 const addNode = (key: string, isEntry = false) => {
-	const circle = Bodies.circle(0, isEntry ? 200 * entries++ : Math.random() * 100 - 50, 10, { isStatic: isEntry, render: {
+	const circle = Bodies.circle(isEntry ? 200 * entries++ : Math.random() * 100 - 50, isEntry ? 0 : Math.random() * 100 - 50, 10, { isStatic: isEntry, render: {
 		fillStyle: isEntry ? "#fff" : currentColor,
 		lineWidth: 0,
 		visible: true,
@@ -60,8 +61,16 @@ const addNode = (key: string, isEntry = false) => {
 	Composite.add(engine.world, circle);
 };
 
-const linkNode = (from: string, to: string) => {
-	const circle = bodies.get(to)!;
+const linkNode = (from: string, to: string, create = false) => {
+	let circle = bodies.get(to);
+	if (!circle) {
+		if (!create) return;
+		if (constraintMap.get(from)?.length || 0) currentColor = randomRGB();
+		else currentColor = bodies.get(from)!.render.fillStyle!;
+		addNode(to);
+		circle = bodies.get(to)!;
+	}
+
 	const constraint = Constraint.create({
 		bodyA: bodies.get(from),
 		bodyB: circle,
@@ -76,16 +85,29 @@ const linkNode = (from: string, to: string) => {
 	constraintMap.set(from, (constraintMap.get(from) || []).concat([{ next: to, constraint }]));
 	bodies.set(to, circle);
 	Composite.add(engine.world, constraint);
+	const set = (parentMap.get(to) || new Set());
+	set.add(from);
+	parentMap.set(to, set);
 };
 
 const unlinkNode = (from: string, to: string) => {
 	const list = constraintMap.get(from);
-	if (!list) return;
+	if (!list) return false;
 	const index = list.findIndex(({ next }) => next == to);
-	if (index === undefined || index < 0) return;
+	if (index === undefined || index < 0) return false;
 	Composite.remove(engine.world, list[index].constraint);
 	list.splice(index, 1);
-	constraintMap.set(from, list);
+	if (list.length) constraintMap.set(from, list);
+	else constraintMap.delete(from);
+	const set = parentMap.get(to);
+	set?.delete(from);
+	if (!set?.size) {
+		if (bodies.has(to)) Composite.remove(engine.world, bodies.get(to)!);
+		bodies.delete(to);
+		parentMap.delete(to);
+		return true;
+	}
+	return false;
 };
 
 export function App() {
@@ -143,22 +165,33 @@ export function App() {
 				}
 			}
 		};
-		const onWheel = (ev: WheelEvent) => {
-			render.bounds.min.x += ev.deltaX;
-			render.bounds.max.x += ev.deltaX;
-			render.bounds.min.y += ev.deltaY;
-			render.bounds.max.y += ev.deltaY;
-			Render.lookAt(render, [render.bounds]);
+
+		const onMouseDown = (ev: MouseEvent) => {
+			// Scroll wheel button
+			if (ev.button != 1) return;
+			let lastPos = { x: ev.clientX, y: ev.clientY };
+			const onMouseMove = (ev: MouseEvent) => {
+				render.bounds.min.x -= ev.clientX - lastPos.x;
+				render.bounds.max.x -= ev.clientX - lastPos.x;
+				render.bounds.min.y -= ev.clientY - lastPos.y;
+				render.bounds.max.y -= ev.clientY - lastPos.y;
+				Render.lookAt(render, [render.bounds]);
+				lastPos = { x: ev.clientX, y: ev.clientY };
+			};
+			window.addEventListener("mousemove", onMouseMove);
+			window.addEventListener("mouseup", () => {
+				window.removeEventListener("mousemove", onMouseMove);
+			}, { once: true });
 		};
 
 		window.addEventListener("popstate", onPopState);
 		window.addEventListener("keydown", onKeyDown);
-		window.addEventListener("wheel", onWheel);
+		window.addEventListener("mousedown", onMouseDown);
 		window.addEventListener("resize", onResize);
 		return () => {
 			window.removeEventListener("popstate", onPopState);
 			window.removeEventListener("keydown", onKeyDown);
-			window.removeEventListener("wheel", onWheel);
+			window.removeEventListener("mousedown", onMouseDown);
 			window.removeEventListener("resize", onResize);
 		}
   }, []);
@@ -235,7 +268,6 @@ export function App() {
 				if (!body) return;
 				// @ts-ignore: extra key
 				const key = body.conversation as string;
-				console.log(key);
 				if (!key) return;
 				setId(key);
 			});
@@ -249,6 +281,6 @@ export function App() {
 		}} scroll={() => cell.current?.scrollIntoView()} renameEntry={name => {
 			data.conversation.set(name, data.conversation.get(id)!);
 			setId(name);
-		}} save={save} download={download} addNode={addNode} linkNode={linkNode} unlinkNode={unlinkNode} />}
+		}} save={save} download={download} linkNode={linkNode} unlinkNode={unlinkNode} />}
 	</>;
 }

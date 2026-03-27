@@ -1,4 +1,4 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { Summatia, SummatiaConversationBranch, SummatiaConversationEither, SummatiaConversationLinear, SummatiaResponse } from "../types/summatia";
 import Restaurant from "./restaurant";
 import TogglableInput from "./toggle-input";
@@ -11,118 +11,127 @@ type Props = {
 	scroll: () => void;
 	save: () => void;
 	download: () => void;
-	addNode: (key: string) => void;
-	linkNode: (from: string, to: string) => void;
-	unlinkNode: (from: string, to: string) => void;
+	linkNode: (from: string, to: string, create?: boolean) => void;
+	unlinkNode: (from: string, to: string) => boolean;
 };
 
 export default function Preview(props: Props) {
-	const [large, setLarge] = useState(false);
-	const [entry, setEntry] = useState(props.entry);
-	const [conv, setConv] = useState<SummatiaConversationEither<true>>(props.data.conversation.get(props.entry)!);
-	const [emotion, setEmotion] = useState(conv.emotion.num());
-	const [message, setMessage] = useState(conv.message);
-	const [next, setNext] = useState((conv as any).next as (string | undefined));
-	const [responses, setResponses] = useState((conv as any).responses as (SummatiaResponse[] | undefined));
+	const convRef = useRef<SummatiaConversationEither<true>>(props.data.conversation.get(props.entry)!);
+	const [emotion, setEmotion] = useState(convRef.current.emotion.num());
+	const [message, setMessage] = useState(convRef.current.message);
+	const [next, setNext] = useState((convRef.current as any).next as (string | undefined));
+	const [responses, setResponses] = useState((convRef.current as any).responses as (SummatiaResponse[] | undefined));
 
-	const save = () => {
-		// save entry if not exist
-		if (!props.data.conversation.has(entry) && message) {
-			props.data.conversation.set(entry, conv);
+	const recursiveUnlinkNode = (from: string, to: string) => {
+		if (!props.unlinkNode(from, to)) return;
+		const conv = props.data.conversation.get(to);
+		if (!conv) return;
+		if ((conv as any).next) {
+			recursiveUnlinkNode(to, (conv as SummatiaConversationLinear).next);
+		} else if ((conv as any).responses) {
+			(conv as SummatiaConversationBranch).responses.forEach(({ next }) => recursiveUnlinkNode(to, next));
 		}
-		props.save();
+		props.data.conversation.delete(to);
 	};
 
 	useEffect(() => {
-		// save entry if not exist
-		if (!props.data.conversation.has(entry) && message) {
-			props.data.conversation.set(entry, conv);
-		}
-		setEntry(props.entry);
-		// create entry based on previous if not exist
-		let newConv = props.data.conversation.get(props.entry) || { message: "", emotion: conv.emotion.copy() };
-		setConv(newConv);
-		setEmotion(newConv.emotion.num());
-		setMessage(newConv.message);
-		setNext((newConv as any).next as (string | undefined));
-		setResponses((newConv as any).responses as (SummatiaResponse[] | undefined));
+		convRef.current = props.data.conversation.get(props.entry) || { message: "", emotion: convRef.current.emotion.copy() };
+		setEmotion(convRef.current.emotion.num());
+		setMessage(convRef.current.message);
+		setNext((convRef.current as SummatiaConversationLinear).next);
+		setResponses((convRef.current as SummatiaConversationBranch).responses);
+		if (!props.data.conversation.has(props.entry))
+			props.data.conversation.set(props.entry, convRef.current);
 	}, [props.entry]);
 
 	const changeEmotion = (bit: number) => {
-		conv.emotion.set(bit, !conv.emotion.get(bit));
-		setEmotion(conv.emotion.num());
+		convRef.current.emotion.set(bit, !convRef.current.emotion.get(bit));
+		setEmotion(convRef.current.emotion.num());
 	};
 
 	const changeMessage = (message: string) => {
-		conv.message = message;
-		setMessage(message);
-	};
+		convRef.current.message = message;
+		setMessage(convRef.current.message);
+	}
 
 	const changeNext = (next: string) => {
-		(conv as SummatiaConversationLinear).next = next;
-		setNext(next);
+		const conv = convRef.current as SummatiaConversationLinear;
+		if (next != conv.next) {
+			recursiveUnlinkNode(props.entry, conv.next);
+			if (next) props.linkNode(props.entry, next, true);
+			conv.next = next;
+			setNext(conv.next);
+		}
 	};
 
 	const changeResponse = (message: string, next: string, index: number) => {
-		const conve = conv as SummatiaConversationBranch;
-		conve.responses[index].message = message;
-		conve.responses[index].next = next;
-		console.log(conve.responses[index]);
-		setResponses(Array.from(conve.responses));
+		const conv = convRef.current as SummatiaConversationBranch;
+		if (next != conv.responses[index].next) {
+			recursiveUnlinkNode(props.entry, conv.responses[index].next);
+			if (next) props.linkNode(props.entry, next, true);
+			conv.responses[index].next = next;
+		}
+		conv.responses[index].message = message;
+		setResponses(Array.from(conv.responses));
 	};
 
 	const toLinear = () => {
-		const conve = conv as SummatiaConversationLinear & Partial<SummatiaConversationBranch>;
-		delete conve.responses;
-		const split = entry.split(/-/g);
+		const conv = convRef.current as SummatiaConversationLinear & Partial<SummatiaConversationBranch>;
+		if (conv.responses) {
+			conv.responses.forEach(({ next }) => recursiveUnlinkNode(props.entry, next));
+			delete conv.responses;
+		}
+		const split = props.entry.split(/-/g);
 		if (isNaN(Number(split[split.length - 1]))) split.push("1");
 		else split[split.length - 1] = (Number(split[split.length - 1]) + 1).toString();
-		conve.next = split.join("-");
-		setNext(conve.next);
+		conv.next = split.join("-");
+		props.linkNode(props.entry, conv.next, true);
+		setNext(conv.next);
 		setResponses(undefined);
 	};
 
 	const toBranch = () => {
-		const conve = conv as SummatiaConversationBranch & Partial<SummatiaConversationLinear>;
-		delete conve.next;
-		conve.responses = [];
-		setNext(conve.next);
-		setResponses(conve.responses);
+		const conv = convRef.current as SummatiaConversationBranch & Partial<SummatiaConversationLinear>;
+		if (conv.next) recursiveUnlinkNode(props.entry, conv.next);
+		delete conv.next;
+		conv.responses = [];
+		setNext(undefined);
+		setResponses(conv.responses);
 	};
 
 	const addBranch = () => {
-		const conve = conv as SummatiaConversationBranch;
-		conve.responses.push({ message: "Message", next: "Next" });
-		setResponses(Array.from(conve.responses));
+		(convRef.current as SummatiaConversationBranch).responses.push({ message: "Message", next: "Next" });
+		setResponses(Array.from((convRef.current as SummatiaConversationBranch).responses));
 	};
 
 	const deleteBranch = (index: number) => {
 		if (confirm("Are you sure?")) {
-			const conve = conv as SummatiaConversationBranch;
-			conve.responses.splice(index, 1);
-			setResponses(Array.from(conve.responses));
+			const conv = convRef.current as SummatiaConversationBranch;
+			recursiveUnlinkNode(props.entry, conv.responses[index].next);
+			conv.responses.splice(index, 1);
+			setResponses(Array.from(conv.responses));
 		}
 	};
 
 	const moveBranch = (index: number, up: boolean) => {
-		const conve = conv as SummatiaConversationBranch;
-		if (up && index == 0 || !up && index == conve.responses.length - 1) return;
-		const tmp = conve.responses[index];
+		const conv = convRef.current as SummatiaConversationBranch;
+		if (up && index == 0 || !up && index == conv.responses.length - 1) return;
+		const tmp = conv.responses[index];
 		const swap = up ? index - 1 : index + 1;
-		conve.responses[index] = conve.responses[swap];
-		conve.responses[swap] = tmp;
-		setResponses(Array.from(conve.responses));
+		conv.responses[index] = conv.responses[swap];
+		conv.responses[swap] = tmp;
+		setResponses(Array.from(conv.responses));
 	};
 
-	return <div className="preview" style={large ? { maxHeight: "40vh" } : {}}>
-		<Restaurant emotion={emotion} toggleLarge={() => setLarge(!large)} onToggleCheck={changeEmotion}>
+	return <div className="preview">
+		<Restaurant emotion={emotion} onToggleCheck={changeEmotion}>
 			<div className="preview-text">
-				<TogglableInput className="preview-key" value={entry} onCommit={props.renameEntry} onClick={() => props.scroll()} />
+				<TogglableInput className="preview-key" value={props.entry} onCommit={props.renameEntry} onClick={() => props.scroll()} />
 				<TogglableInput value={message} onCommit={changeMessage} />
 				<hr />
 				{next && <TogglableInput
 					className="preview-next"
-					onClick={() => props.next((conv as SummatiaConversationLinear).next)}
+					onClick={() => props.next(next)}
 					value={next}
 					onCommit={changeNext}
 				/>}
@@ -156,7 +165,7 @@ export default function Preview(props: Props) {
 				{responses && <div className="preview-button response" onClick={addBranch}>
 					Add Response
 				</div>}
-				<div className="preview-button save" onClick={save}>
+				<div className="preview-button save" onClick={props.save}>
 					Save
 				</div>
 				<div className="preview-button save" onClick={props.download}>
