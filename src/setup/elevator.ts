@@ -40,7 +40,8 @@ app.get("/:page?", (req, res) => {
 	if (isbot(req.get("user-agent"))) {
 		// create page using seo template
 		let template = TEMPLATE.get();
-		let content = PAGES.get("ground")!.get();
+		const firstKey = Array.from(PAGES.keys()).sort()[0];
+		let content = PAGES.get(firstKey)!.get();
 		if (PAGES.has(req.params.page || ""))
 			content = PAGES.get(req.params.page!)!.get();
 		template = template.replace("{content}", content);
