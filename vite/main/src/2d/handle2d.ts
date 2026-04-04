@@ -105,6 +105,11 @@ export function setupHandlers(main2d: Main2D) {
 		window.location.href = window.location.pathname + search;
 	};
 
+	otherButtonSetup(main2d.buttons);
+	main2d.buttons.onclick = async () => {
+		main2d.toggleContent(undefined, ()  => main2d.contentByNum(1002));
+	};
+
 	// touch handlers for mobile support
 	let touch = { ix: 0, x: 0, offset: 0 };
 	let canTouch = false, mouseDown = false;

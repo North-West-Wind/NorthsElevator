@@ -386,6 +386,40 @@ svg * {
   transition: transform 2s linear, opacity 2s linear;
 }
 
+@keyframes button-oscillation {
+	0% {
+		transform: translateX(-.1vw) scale(1) ;
+	}
+
+	50% {
+		transform: translate(.1vw) scale(1.01) ;
+	}
+
+	100% {
+		transform: translateX(-.1vw) scale(1) ;
+	}
+}
+
+.board-button {
+	animation: button-oscillation 4s;
+	animation-iteration-count: infinite;
+	animation-timing-function: cubic-bezier(0.5, 0.05, 0.5, 0.95);
+	animation-fill-mode: backwards;
+	transform-origin: center;
+}
+
+#board-button-2 {
+	animation-delay: .3s;
+}
+
+#board-button-3 {
+	animation-delay: .6s;
+}
+
+#board-button-4 {
+	animation-delay: .9s;
+}
+
 /* summatia */
 .summatia-container {
 	position: fixed;

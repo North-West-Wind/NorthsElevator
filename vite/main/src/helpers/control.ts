@@ -89,6 +89,7 @@ export async function cacheApiConfig() {
 			console.error(err);
 		}
 	}
+	return cachedApiConfig;
 }
 
 export function getApiConfig() {

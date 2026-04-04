@@ -22,6 +22,7 @@ export class Main2D extends Elevator {
 	readonly noSmooth = document.querySelector<SVGPathElement>("#no-smooth")!;
 	readonly threeDimension = document.querySelector<SVGGElement>("#three-dim")!;
 	readonly stamp = document.querySelector<SVGGElement>("#stamp")!;
+	readonly buttons = document.querySelector<SVGGElement>("#buttons")!;
 
 	moving = 0; // 1 means up, -1 means down, 0 means not moving
 	state = 0; // 0 inside, 1 opening, 2 zooming, 3 htmling, 4 backing, 5 stay, 6 closing
@@ -105,7 +106,7 @@ export class Main2D extends Elevator {
 
 export default async function init2D() {
 	// Cache /api/config
-	await cacheApiConfig();
+	const config = await cacheApiConfig();
 	try {
 		// Change to 2D
 		const canvas = document.querySelector("canvas")!;
@@ -130,7 +131,16 @@ export default async function init2D() {
 			const svgTag = elevatorSvg.match(/<svg(\n\s*[\w:]*=("|').*("|'))*>/);
 			if (svgTag)
 				elevatorSvg = elevatorSvg.replace(svgTag[0], svgTag[0].replace(/(\n)?\s*(width|height)=("|')\d+(\.\d+)?("|')/g, ""));
-
+			// Replace buttons with images
+			const buttons = (config?.buttons as string[] | undefined)?.map(val => ({ val, sort: Math.random() + (val.endsWith(".gif") ? 1 : 0) })).sort((a, b) => a.sort - b.sort).map(({ val }) => val);
+			let matches = elevatorSvg.match(/<rect(\n\s*[\w:]*=("|').*("|'))*\n\s*id="board-button-\d"/);
+			while (matches?.[0]) {
+				const button = buttons?.shift();
+				if (!button) break;
+				elevatorSvg = elevatorSvg.replace(matches[0], matches[0].replace("rect", "image") + ` xlink:href="/assets/images/buttons/${button}"`);
+				matches = elevatorSvg.match(/<rect(\n\s*[\w:]*=("|').*("|'))*\n\s*id="board-button-\d"/);
+			}
+			elevatorSvg = elevatorSvg
 			elevatorDiv.innerHTML = elevatorSvg;
 			const movable = canvas.parentElement as HTMLDivElement;
 			movable.style.position = "initial";
