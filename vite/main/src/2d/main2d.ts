@@ -132,7 +132,7 @@ export default async function init2D() {
 			if (svgTag)
 				elevatorSvg = elevatorSvg.replace(svgTag[0], svgTag[0].replace(/(\n)?\s*(width|height)=("|')\d+(\.\d+)?("|')/g, ""));
 			// Replace buttons with images
-			const buttons = (config?.buttons as string[] | undefined)?.map(val => ({ val, sort: Math.random() + (val.endsWith(".gif") ? 1 : 0) })).sort((a, b) => a.sort - b.sort).map(({ val }) => val);
+			const buttons = (config?.buttons as string[] | undefined)?.map(val => ({ val, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ val }) => val);
 			let matches = elevatorSvg.match(/<rect(\n\s*[\w:]*=("|').*("|'))*\n\s*id="board-button-\d"/);
 			while (matches?.[0]) {
 				const button = buttons?.shift();
