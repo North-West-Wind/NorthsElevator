@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { displayTexture, makeLift } from "./generators";
 import { enableStylesheet, disableStylesheet } from "../helpers/css";
-import { getConfig, writeConfig } from "../helpers/control";
+import { cacheApiConfig, getConfig, writeConfig } from "../helpers/control";
 import { FirstPersonControls } from "three/addons/controls/FirstPersonControls.js";
 import { setupHandlers } from "./handle3d";
 import Elevator from "../main";
@@ -25,6 +25,7 @@ export class Main3D extends Elevator {
 	ratio = window.innerWidth / window.innerHeight;
 	touched = false;
 	lastTouched = 0;
+	frames = 0;
 
 	// HTML stuff
 	readonly info = document.querySelector<HTMLDivElement>("#info")!;
@@ -108,14 +109,26 @@ export class Main3D extends Elevator {
 	}
 
 	private animate() {
+		this.frames++;
 	  requestAnimationFrame(() => this.animate());
 
 	  this.controls?.update(this.clock?.getDelta() || 0);
 	  this.renderer.render(this.scene, this.camera);
+
+		// Floaty buttons
+		let index = 0;
+		for (const key in this.objects) {
+			if (!key.startsWith("boardButton")) continue;
+			const offset = Math.sin(index + this.frames / 50) * 0.5;
+			this.objects[key].position.z = -47.5 + offset;
+			index++;
+		}
 	}
 }
 
 export default async function init3D() {
+	// Cache /api/config
+	await cacheApiConfig();
 	// Preload font for textures later
 	await document.fonts.load('10pt "YosterIsland"');
 	const main3d = new Main3D();

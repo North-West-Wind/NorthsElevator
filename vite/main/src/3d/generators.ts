@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { TEXTURE_LOADER } from "./loaders";
-import { isMusic, isSmoothScroll } from "../helpers/control";
+import { getApiConfig, isMusic, isSmoothScroll } from "../helpers/control";
 import { configTexture } from "../helpers/macro";
 
 type LiftObjects = { [key: string]: THREE.Mesh | THREE.Group };
@@ -21,7 +21,8 @@ export function makeLift(scene: THREE.Scene, passedInFloor: number) {
 		makeButtons(scene),
 		makeLeftButtons(scene),
 		makeRightButtons(scene),
-		makeSign(scene)
+		makeSign(scene),
+		makeBoard(scene),
 	);
 	if (passedInFloor > 0)
 		Object.values(objects).forEach(mesh => mesh.position.y += 1000 * passedInFloor);
@@ -333,6 +334,32 @@ function makeRightButtons(scene: THREE.Scene): LiftObjects {
 	scene.add(stamp);
 
 	return { smoothScroll, twoDimension, stamp };
+}
+
+function makeBoard(scene: THREE.Scene): LiftObjects {
+	const obj: LiftObjects = {};
+
+	const geometry = new THREE.BoxGeometry(10, 20, 1);
+	const material = new THREE.MeshBasicMaterial({ color: 0x073c6b });
+	const boardBase = new THREE.Mesh(geometry, material);
+	boardBase.position.set(42, 2, -48.9);
+
+	const buttons = (getApiConfig()?.buttons as string[] | undefined)?.map(val => ({ val, sort: Math.random() + (val.endsWith(".gif") ? 1 : 0) })).sort((a, b) => a.sort - b.sort).map(({ val }) => val);
+	const buttonGeometry = new THREE.PlaneGeometry(9, 9 * 31 / 88);
+	for (let ii = 0; ii < 4; ii++) {
+		let material: THREE.MeshBasicMaterial;
+		if (buttons?.length) material = new THREE.MeshBasicMaterial({ map: TEXTURE_LOADER.load(`/assets/images/buttons/${buttons.shift()}`, configTexture) });
+		else material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+		const button = new THREE.Mesh(buttonGeometry, material);
+		button.position.set(42, 2 + (ii - 1.5) * 9 * 1.45 * 31 / 88, -47.5);
+		scene.add(button);
+		obj["boardButton" + ii] = button;
+	}
+
+	scene.add(boardBase);
+	obj["boardBase"] = boardBase;
+
+	return obj;
 }
 
 export function displayTexture(floor: boolean | number | null) {

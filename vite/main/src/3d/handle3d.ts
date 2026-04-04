@@ -15,7 +15,7 @@ enum State {
 };
 
 export function setupHandlers(main3d: Main3D) {
-	const { buttonU, buttonD, doorL, doorR, display, sign, music, light, donation, suggestion, smoothScroll, twoDimension, stamp } = main3d.objects;
+	const { buttonU, buttonD, doorL, doorR, display, sign, music, light, donation, suggestion, smoothScroll, twoDimension, stamp, boardBase } = main3d.objects;
 
 	// various variables
 	let state = State.INSIDE;
@@ -121,7 +121,7 @@ export function setupHandlers(main3d: Main3D) {
 		const mouse2D = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
 		const raycaster = new THREE.Raycaster();
 		raycaster.setFromCamera(mouse2D, main3d.camera);
-		const check: THREE.Object3D[] = [buttonU, buttonD, display, sign, music, light, donation, suggestion, smoothScroll, twoDimension, stamp];
+		const check: THREE.Object3D[] = [buttonU, buttonD, display, sign, music, light, donation, suggestion, smoothScroll, twoDimension, stamp, boardBase];
 		if (main3d.floor?.listenMove) check.push(...main3d.floor.moveCheck());
 		const intersect = raycaster.intersectObjects(check);
 		if (intersect.length > 0) document.body.style.cursor = "pointer";
@@ -176,6 +176,9 @@ export function setupHandlers(main3d: Main3D) {
 			openStamper();
 		} else if (main3d.floor?.listenClick) {
 			main3d.floor.clickRaycast(raycaster);
+			start = true;
+		} else if (raycaster.intersectObject(boardBase).length > 0) {
+			main3d.toggleContent(undefined, () => main3d.contentByNum(1002));
 			start = true;
 		} else start = true;
 		if (button) {

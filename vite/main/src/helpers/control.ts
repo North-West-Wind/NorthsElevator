@@ -77,3 +77,16 @@ export async function openStamper() {
 	const div = document.querySelector("div[web-stamp]");
 	div?.removeAttribute("ws-disabled");
 }
+
+let cachedApiConfig: any;
+export async function cacheApiConfig() {
+	if (!cachedApiConfig) {
+		const res = await fetch(`/api/config`);
+		if (!res.ok) return;
+		cachedApiConfig = await res.json();
+	}
+}
+
+export function getApiConfig() {
+	return cachedApiConfig;
+}

@@ -3,22 +3,15 @@ import Floor from "../types/floor";
 import { TEXTURE_LOADER } from "../3d/loaders";
 import { fetchText } from "../helpers/reader";
 import { LazyLoader } from "../types/misc";
-
-const TEMPLATE = new LazyLoader(() => fetchText("/contents/gallery/template.html"));
-let FILES: string[] = [];
-
-fetch(`/api/config`).then(async res => {
-	if (!res.ok) return;
-	const files = <string[]>(await res.json()).pfps;
-	FILES = files.sort();
-});
+import { getApiConfig } from "../helpers/control";
 
 const PAINTING_LENGTH = 50;
 const LENGTH_PER_PAINTING = PAINTING_LENGTH + 30;
 
 export default class GalleryFloor extends Floor {
-	private static fileNames: Promise<string[]>;
-	private static floorLength: number;
+	static readonly TEMPLATE = new LazyLoader(() => fetchText("/contents/gallery/template.html"));
+	private static fileNames: string[] = [];
+	private static floorLength = 0;
 	paintings: THREE.Mesh[] = [];
 
 	constructor() {
@@ -28,9 +21,12 @@ export default class GalleryFloor extends Floor {
 	}
 
 	static {
-		this.fileNames = fetch(`/api/config`).then(res => res.json()).then(json => json.pfps.sort());
-		this.floorLength = 0;
-		this.fileNames.then(pfps => this.floorLength = Math.ceil((pfps.length - 1) * 0.5) * LENGTH_PER_PAINTING);
+		const config = getApiConfig();
+		if (config) {
+			const files = <string[]>config.pfps;
+			this.fileNames = files.sort();
+			this.floorLength = Math.ceil((files.length - 1) * 0.5) * LENGTH_PER_PAINTING;
+		}
 	}
 
 	async spawn(scene: THREE.Scene) {
@@ -144,7 +140,7 @@ export default class GalleryFloor extends Floor {
 		this.main3d().toggleContent(this, async () => {
 			const file = (await GalleryFloor.fileNames)[index];
 			if (!file) return "";
-			return (await TEMPLATE.get()).replace("{title}", file.split(" ").slice(1).join(" ").split(".").slice(0, -1).join(".")).replace("{src}", `assets/pfps/${file}`);
+			return (await GalleryFloor.TEMPLATE.get()).replace("{title}", file.split(" ").slice(1).join(" ").split(".").slice(0, -1).join(".")).replace("{src}", `assets/pfps/${file}`);
 		});
 	}
 
@@ -161,8 +157,8 @@ export default class GalleryFloor extends Floor {
 	}
 
 	async loadPicture(info: HTMLDivElement, index: number) {
-		const file = FILES[index];
-		info.innerHTML = (await TEMPLATE.get()).replace("{title}", file.split(" ").slice(1).join(" ").split(".").slice(0, -1).join(".")).replace("{src}", `/assets/pfps/${file}`);
+		const file = GalleryFloor.fileNames[index];
+		info.innerHTML = (await GalleryFloor.TEMPLATE.get()).replace("{title}", file.split(" ").slice(1).join(" ").split(".").slice(0, -1).join(".")).replace("{src}", `/assets/pfps/${file}`);
 
 		const h1 = info.querySelector<HTMLHeadingElement>("h1")!;
 		h1.classList.add("sheet-back");
@@ -175,8 +171,8 @@ export default class GalleryFloor extends Floor {
 		info.innerHTML = await this.content.get();
 
 		let columnDiv: HTMLDivElement;
-		for (let ii = 0; ii < FILES.length; ii++) {
-			const file = FILES[ii];
+		for (let ii = 0; ii < GalleryFloor.fileNames.length; ii++) {
+			const file = GalleryFloor.fileNames[ii];
 			if (ii % 2 == 0) {
 				columnDiv = document.createElement("div");
 				columnDiv.classList.add("flex", "vcenter");

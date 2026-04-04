@@ -2,18 +2,10 @@ import * as THREE from "three";
 import Floor, { Generated } from "../types/floor";
 import { fetchText } from "../helpers/reader";
 import { LazyLoader } from "../types/misc";
-import { wait } from "../helpers/control";
+import { getApiConfig, wait } from "../helpers/control";
 import { SVG_LOADER } from "../3d/loaders";
 import { clamp, createSVGCenteredGroup, createSVGGroupWithCenter, randomBetween } from "../helpers/math";
 import { SVGResult } from "three/addons/loaders/SVGLoader.js";
-
-const PAGES = new Map<string, LazyLoader<string>>();
-fetch(`/api/config`).then(async res => {
-	if (!res.ok) return;
-	const files = <string[]>(await res.json()).info;
-	for (const file of files)
-		PAGES.set(file.split(".").slice(0, -1).join("."), new LazyLoader(() => fetchText(`/contents/info-center/${file}`)));
-});
 
 const topLength = 120, bottomLength = 108, topDepth = 25;
 const deskHeight = 30;
@@ -28,6 +20,7 @@ enum AnimationState {
 }
 
 export default class InfoCenterFloor extends Floor {
+	static readonly PAGES = new Map<string, LazyLoader<string>>();
 	dinged = false;
 	svgLoaded = false;
 	handsData?: SVGResult;
@@ -37,6 +30,15 @@ export default class InfoCenterFloor extends Floor {
 	animationState = AnimationState.IDLE;
 	animationPos?: THREE.Vector3;
 	animationStart?: number;
+
+	static {
+		const config = getApiConfig();
+		if (config) {
+			const files = <string[]>config.info;
+			for (const file of files)
+				this.PAGES.set(file.split(".").slice(0, -1).join("."), new LazyLoader(() => fetchText(`/contents/info-center/${file}`)));
+		}
+	}
 
 	constructor() {
 		super("info-center", 1);
@@ -298,12 +300,12 @@ export default class InfoCenterFloor extends Floor {
 
 	private async loadConversation(info: HTMLDivElement, next: string) {
 		if (this.main2d()) {
-			const page = PAGES.get(next);
+			const page = InfoCenterFloor.PAGES.get(next);
 			if (page) info.innerHTML = await page.get();
 			else info.innerHTML = await this.content.get();
 		} else {
-			if (info.classList.contains("hidden")) this.main3d().toggleContent(this, await (PAGES.has(next) ? PAGES.get(next)!.get() : this.main3d().contentByNum(this.num)));
-			else info.innerHTML = await (PAGES.has(next) ? PAGES.get(next)!.get() : this.main3d().contentByNum(this.num));
+			if (info.classList.contains("hidden")) this.main3d().toggleContent(this, await (InfoCenterFloor.PAGES.has(next) ? InfoCenterFloor.PAGES.get(next)!.get() : this.main3d().contentByNum(this.num)));
+			else info.innerHTML = await (InfoCenterFloor.PAGES.has(next) ? InfoCenterFloor.PAGES.get(next)!.get() : this.main3d().contentByNum(this.num));
 		}
 		this.loadContent(info);
 	}

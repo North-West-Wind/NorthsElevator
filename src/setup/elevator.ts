@@ -26,7 +26,8 @@ const SEO_CONFIG = {
 };
 const API_CONFIG = new Cached(1800000, () => ({
 	pfps: fs.readdirSync(path.join(root, "assets/pfps"), { withFileTypes: true }).filter(ent => ent.isFile()).map(ent => ent.name),
-	info: fs.readdirSync(path.join(root, "contents/info-center"))
+	info: fs.readdirSync(path.join(root, "contents/info-center")),
+	buttons: fs.readdirSync(path.join(root, "assets/images/buttons"))
 }));
 
 app.get("/api/config", (_req, res) => {

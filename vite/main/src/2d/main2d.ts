@@ -1,4 +1,4 @@
-import { wait } from "../helpers/control";
+import { cacheApiConfig, wait } from "../helpers/control";
 import Elevator from "../main";
 import { setupHandlers } from "./handle2d";
 
@@ -104,6 +104,8 @@ export class Main2D extends Elevator {
 }
 
 export default async function init2D() {
+	// Cache /api/config
+	await cacheApiConfig();
 	try {
 		// Change to 2D
 		const canvas = document.querySelector("canvas")!;

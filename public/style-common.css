@@ -265,6 +265,31 @@ a:hover, .link-like *:hover {
 	margin: auto;
 }
 
+.button-grid {
+	display: grid;
+  grid-template-columns: min-content min-content min-content min-content min-content min-content min-content;
+	width: min-content;
+	margin: auto;
+}
+
+@media (max-width: 616px) {
+	.button-grid {
+	  grid-template-columns: min-content min-content min-content min-content min-content;
+	}
+}
+
+@media (max-width: 440px) {
+	.button-grid {
+	  grid-template-columns: min-content min-content min-content;
+	}
+}
+
+@media (max-width: 264px) {
+	.button-grid {
+	  grid-template-columns: min-content;
+	}
+}
+
 /* 2d specific */
 
 .background {

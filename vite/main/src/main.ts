@@ -6,7 +6,7 @@ import NotFoundFloor from "./floors/not_found";
 import RestaurantFloor from "./floors/restaurant";
 import SheetMusicFloor from "./floors/sheet_music";
 import SkyFarmFloor from "./floors/sky_farm";
-import { wait } from "./helpers/control";
+import { getApiConfig, wait } from "./helpers/control";
 import { fetchText } from "./helpers/reader";
 import Floor from "./types/floor";
 import { LazyLoader } from "./types/misc";
@@ -48,6 +48,23 @@ export default abstract class Elevator {
 		
 		this.contents.set(1000, new LazyLoader(() => fetchText(`/contents/elevator/donation.html`)));
 		this.contents.set(1001, new LazyLoader(() => fetchText(`/contents/elevator/suggestion.html`)));
+		this.contents.set(1002, new LazyLoader(async () => {
+			let text = await fetchText(`/contents/elevator/buttons.html`);
+			const buttons: string[] | undefined = getApiConfig()?.buttons;
+			if (buttons?.length) {
+				let myButtons = "", otherButtons = "";
+				const me = ["northwestw.in", "blog.northwestw.in"];
+				for (const button of buttons) {
+					const link = button.split(".").slice(0, -1).join(".");
+					const tag = `<a href="https://${link}" target="${link}"><img src="/assets/images/buttons/${button}" /></a>`;
+					if (me.includes(link)) myButtons += tag;
+					else otherButtons += tag;
+				}
+				text = text.replace("{my-buttons}", myButtons);
+				text = text.replace("{other-buttons}", otherButtons);
+			}
+			return text;
+		}));
 
 		this.closer.onclick = () => {
 			if (!this.infoDiv.classList.contains('hidden')) this.toggleContent();
