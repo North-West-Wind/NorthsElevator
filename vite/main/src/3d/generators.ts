@@ -325,9 +325,9 @@ function makeRightButtons(scene: THREE.Scene): LiftObjects {
 	const stampStickMaterial = new THREE.MeshStandardMaterial({ color: 0xd29934 });
 	const stampStick = new THREE.Mesh(stampStickGeometry, stampStickMaterial);
 
-	stampGlass.position.set(39.5, -14, -47.25);
-	stampBase.position.set(39.5, -13.5, -47.25);
-	stampStick.position.set(39.5, -11.5, -47.25);
+	stampGlass.position.set(39.5, -16, -47.25);
+	stampBase.position.set(39.5, -15.5, -47.25);
+	stampStick.position.set(39.5, -13.5, -47.25);
 
 	const stamp = new THREE.Group();
 	stamp.add(stampGlass, stampBase, stampStick);
@@ -342,7 +342,7 @@ function makeBoard(scene: THREE.Scene): LiftObjects {
 	const geometry = new THREE.BoxGeometry(10, 20, 1);
 	const material = new THREE.MeshBasicMaterial({ color: 0x073c6b });
 	const boardBase = new THREE.Mesh(geometry, material);
-	boardBase.position.set(42, 2, -48.9);
+	boardBase.position.set(43, -1, -48.9);
 
 	const buttons = (getApiConfig()?.buttons as string[] | undefined)?.map(val => ({ val, sort: Math.random() + (val.endsWith(".gif") ? 1 : 0) })).sort((a, b) => a.sort - b.sort).map(({ val }) => val);
 	const buttonGeometry = new THREE.PlaneGeometry(9, 9 * 31 / 88);
@@ -351,7 +351,7 @@ function makeBoard(scene: THREE.Scene): LiftObjects {
 		if (buttons?.length) material = new THREE.MeshBasicMaterial({ map: TEXTURE_LOADER.load(`/assets/images/buttons/${buttons.shift()}`, configTexture) });
 		else material = new THREE.MeshBasicMaterial({ color: 0xffffff });
 		const button = new THREE.Mesh(buttonGeometry, material);
-		button.position.set(42, 2 + (ii - 1.5) * 9 * 1.45 * 31 / 88, -47.5);
+		button.position.set(43, -1 + (ii - 1.5) * 9 * 1.45 * 31 / 88, -47.5);
 		scene.add(button);
 		obj["boardButton" + ii] = button;
 	}
