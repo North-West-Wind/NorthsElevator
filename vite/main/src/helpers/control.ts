@@ -81,9 +81,13 @@ export async function openStamper() {
 let cachedApiConfig: any;
 export async function cacheApiConfig() {
 	if (!cachedApiConfig) {
-		const res = await fetch(`/api/config`);
-		if (!res.ok) return;
-		cachedApiConfig = await res.json();
+		try {
+			const res = await fetch(`/api/config`);
+			if (!res.ok) return;
+			cachedApiConfig = await res.json();
+		} catch (err) {
+			console.error(err);
+		}
 	}
 }
 
