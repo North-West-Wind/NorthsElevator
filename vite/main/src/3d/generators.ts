@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { TEXTURE_LOADER } from "./loaders";
+import { GLTF_LOADED, TEXTURE_LOADER } from "./loaders";
 import { getApiConfig, isMusic, isSmoothScroll } from "../helpers/control";
 import { configTexture } from "../helpers/macro";
 
@@ -23,6 +23,7 @@ export function makeLift(scene: THREE.Scene, passedInFloor: number) {
 		makeRightButtons(scene),
 		makeSign(scene),
 		makeBoard(scene),
+		makeFork(scene),
 	);
 	if (passedInFloor > 0)
 		Object.values(objects).forEach(mesh => mesh.position.y += 1000 * passedInFloor);
@@ -360,6 +361,16 @@ function makeBoard(scene: THREE.Scene): LiftObjects {
 	obj["boardBase"] = boardBase;
 
 	return obj;
+}
+
+function makeFork(scene: THREE.Scene): LiftObjects {
+	const fork = GLTF_LOADED.fork.got()!;
+	fork.scale.set(1.5, 1.5, 1.5);
+	fork.rotateY(Math.random() * 2 * Math.PI);
+	fork.position.set(Math.random() * 60 - 30, -29, -Math.random() * 30 - 10);
+	scene.add(fork);
+	
+	return { fork };
 }
 
 export function displayTexture(floor: boolean | number | null) {

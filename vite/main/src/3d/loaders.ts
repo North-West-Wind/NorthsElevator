@@ -10,7 +10,8 @@ const MODELS = [
 	"piano",
 	"campfire",
 	"stick",
-	"marshmallow"
+	"marshmallow",
+	"fork"
 ];
 
 export const TEXTURE_LOADER = new TextureLoader();

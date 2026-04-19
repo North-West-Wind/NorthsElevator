@@ -5,6 +5,7 @@ import { cacheApiConfig, getConfig, writeConfig } from "../helpers/control";
 import { FirstPersonControls } from "three/addons/controls/FirstPersonControls.js";
 import { setupHandlers } from "./handle3d";
 import Elevator from "../main";
+import { GLTF_LOADED } from "./loaders";
 
 export class Main3D extends Elevator {
 	// THREE.js stuff
@@ -131,6 +132,8 @@ export default async function init3D() {
 	await cacheApiConfig();
 	// Preload font for textures later
 	await document.fonts.load('10pt "YosterIsland"');
+	// Preload fork
+	await GLTF_LOADED.fork.get();
 	const main3d = new Main3D();
 
   const xm = new THREE.MeshStandardMaterial({ map: displayTexture(main3d.passedInFloor), transparent: true });
