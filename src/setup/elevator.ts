@@ -3,6 +3,7 @@ import { isbot } from "isbot";
 import * as path from "path";
 import { app } from "..";
 import { Cached } from "../cache";
+import sirv from "sirv";
 
 const root = path.resolve(__dirname, "../../public");
 const PAGES = new Map(fs.readdirSync(path.join(root, "contents")).filter(file => file.endsWith(".html")).map(file => {
@@ -29,6 +30,8 @@ const API_CONFIG = new Cached(1800000, () => ({
 	info: fs.readdirSync(path.join(root, "contents/info-center")),
 	buttons: fs.readdirSync(path.join(root, "assets/images/buttons"))
 }));
+
+app.use("/", sirv("./vite/main/dist", { extensions: [] }));
 
 app.get("/api/config", (_req, res) => {
 	res.json(API_CONFIG.get());

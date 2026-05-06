@@ -11,7 +11,9 @@
         "install:main": "cd vite/main && npm i",
         "build:main": "cd vite/main && npm run build",
         "install:uop-editor": "cd uop-editor && npm i",
-        "build:uop-editor": "cd uop-editor && npm run build"
+        "build:uop-editor": "cd uop-editor && npm run build",
+        "install:midi-sort": "cd midi-sort && npm i",
+        "build:midi-sort": "cd midi-sort && npm run build"
     },
     "author": "NorthWestWind",
     "license": "GPL-3.0-or-later",

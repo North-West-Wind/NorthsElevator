@@ -9,8 +9,6 @@ const app = express();
 
 app.use(compression());
 app.use("/", sirv("./public", { extensions: [] }));
-app.use("/", sirv("./vite/main/dist", { extensions: [] }));
-app.use("/", sirv("./uop-editor/dist", { extensions: [] }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.set('views', path.resolve(__dirname, "../views"));
 app.set('view engine', 'ejs');
@@ -21,6 +19,7 @@ export { app };
 import("./setup/tradew1nd");
 import("./setup/redirectors");
 import("./setup/uop");
+import("./setup/midi-sort");
 // elevator last because wildcard
 import("./setup/elevator");
 
