@@ -156,11 +156,6 @@ const updateTooltip = (node?: TreeNode) => {
 };
 updateTooltip(undefined);
 
-canvas.onmousemove = (ev) => {
-	const node = root.nodeAtPosition(ev.clientX - canvas.width / 2, ev.clientY - canvas.height / 2);
-	if (!clickedNode && node) updateTooltip(node);
-};
-
 const mouse = Mouse.create(canvas);
 const mouseConstraint = MouseConstraint.create(engine, {
 	mouse,
