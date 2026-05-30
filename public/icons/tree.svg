@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="256" height="256" version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+	<g>
+		<g transform="translate(-2.5047 -3.9656)" fill="#a47537">
+			<rect transform="rotate(-12.643)" x="88.496" y="175.52" width="6.8866" height="69.555" style="paint-order:stroke fill markers"/>
+			<rect transform="rotate(-45.698)" x="-16.718" y="73.208" width="6.8866" height="112.45" style="paint-order:stroke fill markers"/>
+			<rect transform="rotate(-10.713)" x="92.881" y="52.026" width="6.8866" height="112.45" style="paint-order:stroke fill markers"/>
+			<rect transform="rotate(19.362)" x="162.02" y="-18.784" width="6.8866" height="112.45" style="paint-order:stroke fill markers"/>
+			<rect transform="rotate(47.921)" x="184.45" y="-121.21" width="6.8866" height="112.45" style="paint-order:stroke fill markers"/>
+		</g>
+		<g fill="#35c96c">
+			<circle cx="143.83" cy="225.15" r="17.287" style="paint-order:stroke fill markers"/>
+			<circle cx="122.89" cy="136.03" r="17.287" style="paint-order:stroke fill markers"/>
+			<circle cx="37.669" cy="54.226" r="17.287" style="paint-order:stroke fill markers"/>
+			<circle cx="102.43" cy="32.313" r="17.287" style="paint-order:stroke fill markers"/>
+			<circle cx="159.9" cy="30.852" r="17.287" style="paint-order:stroke fill markers"/>
+			<circle cx="218.33" cy="47.895" r="17.287" style="paint-order:stroke fill markers"/>
+		</g>
+	</g>
+	<metadata>
+		<rdf:RDF>
+			<cc:Work rdf:about="">
+				<cc:license rdf:resource="http://creativecommons.org/licenses/by-nc/4.0/"/>
+			</cc:Work>
+			<cc:License rdf:about="http://creativecommons.org/licenses/by-nc/4.0/">
+				<cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+				<cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+				<cc:requires rdf:resource="http://creativecommons.org/ns#Notice"/>
+				<cc:requires rdf:resource="http://creativecommons.org/ns#Attribution"/>
+				<cc:prohibits rdf:resource="http://creativecommons.org/ns#CommercialUse"/>
+				<cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks"/>
+			</cc:License>
+		</rdf:RDF>
+	</metadata>
+</svg>
