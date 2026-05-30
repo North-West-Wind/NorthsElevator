@@ -17,7 +17,6 @@ export { app };
 
 // some static pages
 import("./setup/tradew1nd");
-import("./setup/redirectors");
 import("./setup/uop");
 import("./setup/midi-sort");
 import("./setup/tree");
