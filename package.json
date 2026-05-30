@@ -10,6 +10,8 @@
         "test": "npm run build && npm start",
         "install:main": "cd vite/main && npm i",
         "build:main": "cd vite/main && npm run build",
+        "install:tree": "cd vite/tree && npm i",
+        "build:tree": "cd vite/tree && npm run build",
         "install:uop-editor": "cd uop-editor && npm i",
         "build:uop-editor": "cd uop-editor && npm run build",
         "install:midi-sort": "cd midi-sort && npm i",

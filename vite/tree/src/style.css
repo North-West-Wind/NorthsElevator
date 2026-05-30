@@ -1,0 +1,87 @@
+@font-face {
+	font-family: 'OdinRounded';
+	src: url('/assets/odin-rounded.regular.otf') format("opentype");
+}
+
+body {
+	font-family: "OdinRounded", Arial, Helvetica, sans-serif;
+	margin: 0;
+	background-color: #000;
+	color: #fff;
+}
+
+canvas {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+}
+
+#tooltip {
+	position: fixed;
+	z-index: 1;
+	background-color: #333a;
+	padding: 1.5vmax;
+	border-radius: 1vmax;
+	right: 1vmax;
+	bottom: 1vmax;
+	max-width: 80vw;
+	font-size: 3vh;
+}
+
+h1, h2 {
+	margin: 0;
+}
+
+h1 {
+	font-size: 4vh;
+	margin: 1vh 0;
+}
+
+h2 {
+	font-size: 3vh;
+	filter: brightness(60%);
+}
+
+a {
+	text-decoration: none;
+	color: #fcba03;
+}
+
+a:hover {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+#noscript {
+	text-align: center;
+}
+
+ul {
+	text-align: left;
+	margin: auto;
+	width: fit-content;
+}
+
+li {
+	display: flex;
+	align-items: center;
+	font-size: 3vh;
+	margin: 1vmax;
+}
+
+li img {
+	width: 4vw;
+	margin-right: 1vw;
+}
+
+p {
+	margin: 0;
+}
+
+#lol {
+	padding: 1vmax;
+	font-size: 3vh;
+	opacity: 0.2;
+}
