@@ -17,10 +17,6 @@ export default class Vec {
 		return new Vec(this.x + vec.x, this.y + vec.y);
 	}
 
-	subtract(vec: VecLike) {
-		return new Vec(this.x - vec.x, this.y - vec.y);
-	}
-
 	rotate(angle: number, counterclockwise = false) {
 		if (counterclockwise) angle *= -1;
 		return new Vec(this.x * Math.cos(angle) - this.y * Math.sin(angle), this.x * Math.sin(angle) + this.y * Math.cos(angle));

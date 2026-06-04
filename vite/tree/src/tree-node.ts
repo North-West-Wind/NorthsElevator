@@ -157,7 +157,6 @@ export default class TreeNode {
 			});
 			Composite.add(this.engine.world, this.constraint);
 			Composite.remove(this.engine.world, old);
-			console.log(this.constraint.length);
 		}
 		this.scale = scale;
 		this.children?.forEach(child => child.resize(scale));

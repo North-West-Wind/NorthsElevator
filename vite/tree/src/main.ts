@@ -51,27 +51,25 @@ h2s.forEach(h2 => {
 	vector = vector.rotate(angleIncrement);
 
 	if (h2.nextElementSibling?.tagName == "UL") {
-		const groupVec = Vec.from(group.body.position).subtract(root.body.position).add(group.body.position);
+		const groupVec = vector.add(group.body.position);
 		const lis = h2.nextElementSibling.querySelectorAll("li");
-		setTimeout(() => {
-			lis.forEach(li => {
-				const anchor = li.querySelector("a")!;
-				new TreeNode(engine, scale, {
-					radius: 0.06,
-					parent: group,
-					position: groupVec,
-					style: {
-						img: li.querySelector("img"),
-						...JSON.parse(li.getAttribute("data-style")!)
-					},
-					tooltip: {
-						title: anchor.innerHTML,
-						subtitle: li.querySelector("p")!.innerHTML,
-						link: anchor.href
-					}
-				});
+		lis.forEach(li => {
+			const anchor = li.querySelector("a")!;
+			new TreeNode(engine, scale, {
+				radius: 0.055,
+				parent: group,
+				position: groupVec,
+				style: {
+					img: li.querySelector("img"),
+					...JSON.parse(li.getAttribute("data-style")!)
+				},
+				tooltip: {
+					title: anchor.innerHTML,
+					subtitle: li.querySelector("p")!.innerHTML,
+					link: anchor.href
+				}
 			});
-		}, 1000);
+		});
 	}
 });
 
