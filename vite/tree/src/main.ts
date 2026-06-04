@@ -51,27 +51,27 @@ h2s.forEach(h2 => {
 	vector = vector.rotate(angleIncrement);
 
 	if (h2.nextElementSibling?.tagName == "UL") {
-		let groupVec = new Vec(0.03 * scale, 0);
+		const groupVec = Vec.from(group.body.position).subtract(root.body.position).add(group.body.position);
 		const lis = h2.nextElementSibling.querySelectorAll("li");
-		const angleIncrement = Math.PI * 2 / lis.length;
-		lis.forEach(li => {
-			const anchor = li.querySelector("a")!;
-			new TreeNode(engine, scale, {
-				radius: 0.06,
-				parent: group,
-				position: groupVec.add(group.body.position),
-				style: {
-					img: li.querySelector("img"),
-					...JSON.parse(li.getAttribute("data-style")!)
-				},
-				tooltip: {
-					title: anchor.innerHTML,
-					subtitle: li.querySelector("p")!.innerHTML,
-					link: anchor.href
-				}
+		setTimeout(() => {
+			lis.forEach(li => {
+				const anchor = li.querySelector("a")!;
+				new TreeNode(engine, scale, {
+					radius: 0.06,
+					parent: group,
+					position: groupVec,
+					style: {
+						img: li.querySelector("img"),
+						...JSON.parse(li.getAttribute("data-style")!)
+					},
+					tooltip: {
+						title: anchor.innerHTML,
+						subtitle: li.querySelector("p")!.innerHTML,
+						link: anchor.href
+					}
+				});
 			});
-			groupVec = groupVec.rotate(angleIncrement);
-		});
+		}, 1000);
 	}
 });
 
@@ -96,9 +96,7 @@ function render() {
 render();
 Runner.run(runner, engine);
 
-const start = Date.now();
 Events.on(engine, "beforeUpdate", () => {
-	if (Date.now() - start < 1000) return;
 	const bodies: Body[] = [];
 	const recurseNode = (node: TreeNode) => {
 		bodies.push(node.body);

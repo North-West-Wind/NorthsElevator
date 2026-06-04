@@ -47,7 +47,7 @@ export default class TreeNode {
 			options.position?.x || (Math.random() * this.radius * this.scale + (options.parent?.body.position.x || 0)),
 			options.position?.y || (Math.random() * this.radius * this.scale + (options.parent?.body.position.y || 0)),
 			this.radius,
-			{ isStatic: !!options.fixed }
+			{ isStatic: !!options.fixed, friction: 1 }
 		);
 		this.resize(scale);
 		Composite.add(engine.world, this.body);

@@ -73,8 +73,8 @@ li {
 }
 
 li img {
-	width: 4vw;
-	margin-right: 1vw;
+	width: 5vmax;
+	margin-right: 1vmax;
 }
 
 p {
