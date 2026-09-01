@@ -307,7 +307,6 @@ export default class InfoCenterFloor extends Floor {
 		} else {
 			if (info.classList.contains("hidden")) this.main3d().toggleContent(this, await (InfoCenterFloor.PAGES.has(next) ? InfoCenterFloor.PAGES.get(next)!.get() : this.main3d().contentByNum(this.num)));
 			else info.innerHTML = await (InfoCenterFloor.PAGES.has(next) ? InfoCenterFloor.PAGES.get(next)!.get() : this.main3d().contentByNum(this.num));
-			console.log(Array.from(InfoCenterFloor.PAGES.keys()));
 		}
 		this.loadContent(info);
 	}
