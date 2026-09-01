@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { displayTexture, makeLift } from "./generators";
 import { enableStylesheet, disableStylesheet } from "../helpers/css";
-import { cacheApiConfig, getConfig, writeConfig } from "../helpers/control";
+import { getConfig, writeConfig } from "../helpers/control";
 import { FirstPersonControls } from "three/addons/controls/FirstPersonControls.js";
 import { setupHandlers } from "./handle3d";
 import Elevator from "../main";
@@ -128,8 +128,6 @@ export class Main3D extends Elevator {
 }
 
 export default async function init3D() {
-	// Cache /api/config
-	await cacheApiConfig();
 	// Preload font for textures later
 	await document.fonts.load('10pt "YosterIsland"');
 	// Preload fork

@@ -2,7 +2,7 @@ import * as THREE from "three";
 import Floor, { Generated } from "../types/floor";
 import { fetchText } from "../helpers/reader";
 import { LazyLoader } from "../types/misc";
-import { getApiConfig, wait } from "../helpers/control";
+import { cacheApiConfig, wait } from "../helpers/control";
 import { SVG_LOADER } from "../3d/loaders";
 import { clamp, createSVGCenteredGroup, createSVGGroupWithCenter, randomBetween } from "../helpers/math";
 import { SVGResult } from "three/addons/loaders/SVGLoader.js";
@@ -32,12 +32,13 @@ export default class InfoCenterFloor extends Floor {
 	animationStart?: number;
 
 	static {
-		const config = getApiConfig();
-		if (config) {
-			const files = <string[]>config.info;
-			for (const file of files)
-				this.PAGES.set(file.split(".").slice(0, -1).join("."), new LazyLoader(() => fetchText(`/contents/info-center/${file}`)));
-		}
+		cacheApiConfig().then(config => {
+			if (config) {
+				const files = <string[]>config.info;
+				for (const file of files)
+					this.PAGES.set(file.split(".").slice(0, -1).join("."), new LazyLoader(() => fetchText(`/contents/info-center/${file}`)));
+			}
+		});
 	}
 
 	constructor() {
@@ -306,6 +307,7 @@ export default class InfoCenterFloor extends Floor {
 		} else {
 			if (info.classList.contains("hidden")) this.main3d().toggleContent(this, await (InfoCenterFloor.PAGES.has(next) ? InfoCenterFloor.PAGES.get(next)!.get() : this.main3d().contentByNum(this.num)));
 			else info.innerHTML = await (InfoCenterFloor.PAGES.has(next) ? InfoCenterFloor.PAGES.get(next)!.get() : this.main3d().contentByNum(this.num));
+			console.log(Array.from(InfoCenterFloor.PAGES.keys()));
 		}
 		this.loadContent(info);
 	}

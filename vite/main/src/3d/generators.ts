@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { GLTF_LOADED, TEXTURE_LOADER } from "./loaders";
-import { getApiConfig, isMusic, isSmoothScroll } from "../helpers/control";
+import { cacheApiConfig, isMusic, isSmoothScroll } from "../helpers/control";
 import { configTexture } from "../helpers/macro";
 
 type LiftObjects = { [key: string]: THREE.Mesh | THREE.Group };
@@ -345,17 +345,24 @@ function makeBoard(scene: THREE.Scene): LiftObjects {
 	const boardBase = new THREE.Mesh(geometry, material);
 	boardBase.position.set(43, -1, -48.9);
 
-	const buttons = (getApiConfig()?.buttons as string[] | undefined)?.map(val => ({ val, sort: Math.random() + (val.endsWith(".gif") ? 1 : 0) })).sort((a, b) => a.sort - b.sort).map(({ val }) => val);
+	const buttonMeshes: THREE.Mesh[] = [];
 	const buttonGeometry = new THREE.PlaneGeometry(9, 9 * 31 / 88);
 	for (let ii = 0; ii < 4; ii++) {
-		let material: THREE.MeshBasicMaterial;
-		if (buttons?.length) material = new THREE.MeshBasicMaterial({ map: TEXTURE_LOADER.load(`/assets/images/buttons/${buttons.shift()}`, configTexture) });
-		else material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-		const button = new THREE.Mesh(buttonGeometry, material);
+		const button = new THREE.Mesh(buttonGeometry, new THREE.MeshBasicMaterial({ color: 0xffffff }));
 		button.position.set(43, -1 + (ii - 1.5) * 9 * 1.45 * 31 / 88, -47.5);
 		scene.add(button);
 		obj["boardButton" + ii] = button;
+		buttonMeshes.push(button);
 	}
+
+	cacheApiConfig().then(config => {
+		if (config) {
+			const buttons = (config.buttons as string[]).map(val => ({ val, sort: Math.random() + (val.endsWith(".gif") ? 1 : 0) })).sort((a, b) => a.sort - b.sort).map(({ val }) => val);
+			for (const buttonMesh of buttonMeshes)
+				if (buttons.length)
+					buttonMesh.material = new THREE.MeshBasicMaterial({ map: TEXTURE_LOADER.load(`/assets/images/buttons/${buttons.shift()}`, configTexture) });
+		}
+	});
 
 	scene.add(boardBase);
 	obj["boardBase"] = boardBase;

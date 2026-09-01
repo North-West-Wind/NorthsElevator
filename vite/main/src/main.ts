@@ -6,7 +6,7 @@ import NotFoundFloor from "./floors/not_found";
 import RestaurantFloor from "./floors/restaurant";
 import SheetMusicFloor from "./floors/sheet_music";
 import SkyFarmFloor from "./floors/sky_farm";
-import { getApiConfig, wait } from "./helpers/control";
+import { cacheApiConfig, wait } from "./helpers/control";
 import { fetchText } from "./helpers/reader";
 import Floor from "./types/floor";
 import { LazyLoader } from "./types/misc";
@@ -50,7 +50,7 @@ export default abstract class Elevator {
 		this.contents.set(1001, new LazyLoader(() => fetchText(`/contents/elevator/suggestion.html`)));
 		this.contents.set(1002, new LazyLoader(async () => {
 			let text = await fetchText(`/contents/elevator/buttons.html`);
-			const buttons: string[] | undefined = getApiConfig()?.buttons;
+			const buttons: string[] | undefined = (await cacheApiConfig())?.buttons;
 			if (buttons?.length) {
 				let myButtons = "", otherButtons = "";
 				const me = ["northwestw.in", "blog.northwestw.in"];

@@ -3,7 +3,7 @@ import Floor from "../types/floor";
 import { TEXTURE_LOADER } from "../3d/loaders";
 import { fetchText } from "../helpers/reader";
 import { LazyLoader } from "../types/misc";
-import { getApiConfig } from "../helpers/control";
+import { cacheApiConfig } from "../helpers/control";
 
 const PAINTING_LENGTH = 50;
 const LENGTH_PER_PAINTING = PAINTING_LENGTH + 30;
@@ -21,12 +21,13 @@ export default class GalleryFloor extends Floor {
 	}
 
 	static {
-		const config = getApiConfig();
-		if (config) {
-			const files = <string[]>config.pfps;
-			this.fileNames = files.sort();
-			this.floorLength = Math.ceil((files.length - 1) * 0.5) * LENGTH_PER_PAINTING;
-		}
+		cacheApiConfig().then(config => {
+			if (config) {
+				const files = <string[]>config.pfps;
+				this.fileNames = files.sort();
+				this.floorLength = Math.ceil((files.length - 1) * 0.5) * LENGTH_PER_PAINTING;
+			}
+		});
 	}
 
 	async spawn(scene: THREE.Scene) {

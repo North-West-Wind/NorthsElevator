@@ -91,7 +91,3 @@ export async function cacheApiConfig() {
 	}
 	return cachedApiConfig;
 }
-
-export function getApiConfig() {
-	return cachedApiConfig;
-}
