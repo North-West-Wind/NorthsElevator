@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import Floor from "../types/floor";
 import { getConfig, writeConfig } from "../helpers/control";
+import { LazyLoader } from "../types/misc";
 
 class RainDrop {
 	node: HTMLDivElement;
@@ -35,9 +36,17 @@ export default class GroundFloor extends Floor {
 	rainDrops: RainDrop[] = [];
 	spawnTimer?: NodeJS.Timer;
 
+	// General
+	motd: LazyLoader<string>;
+
 	constructor() {
 		super("ground", 0);
 		this.listenUpdate = true;
+		this.motd = new LazyLoader(async () => {
+			const res = await fetch("/api/motd");
+			if (res.ok) return await res.text();
+			return "";
+		});
 	}
 
 	spawn(scene: THREE.Scene) {
@@ -93,9 +102,16 @@ export default class GroundFloor extends Floor {
 		infoPageHandler();
 		if (this.main2d()) {
 			// on-the-fly content patching
-			info.querySelector<HTMLHeadingElement>("h1")!.innerHTML = "North's Elevator (2D Edition)";
+			info.querySelector<HTMLHeadingElement>("h1")!.innerHTML = "NorthWestWind's Elevator (2D Edition)";
 			info.removeChild(info.querySelectorAll("p")[1]);
 		}
+		this.motd.get().then(motd => {
+			if (motd) {
+				const h2 = document.createElement("h2");
+				h2.innerHTML = "MOTD: " + motd;
+				info.querySelector<HTMLHeadingElement>("h1")!.append(h2);
+			}
+		});
 	}
 
 	loadSvg() {

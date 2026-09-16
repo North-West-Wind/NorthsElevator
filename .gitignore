@@ -5,3 +5,4 @@ tmp
 .well-known
 dist
 out
+motd.txt

@@ -37,6 +37,11 @@ app.get("/api/config", (_req, res) => {
 	res.json(API_CONFIG.get());
 });
 
+app.get("/api/motd", (_req, res) => {
+	if (!fs.existsSync("motd.txt")) res.send("");
+	else res.send(fs.readFileSync("motd.txt", "utf8"));
+});
+
 app.get("/2d/:page?", (req, res) => {
 	res.redirect(301, `/${req.params.page || ""}?flat`);
 });
